@@ -57,8 +57,9 @@ function printTest(id){
  const qs=t?.questions;
  if(!qs){alert('Für diesen Test sind keine Druckaufgaben vorhanden.');return}
  const esc=escapeHTML;
- const questions=qs.map((q,i)=>`<article class="item"><div class="question-title"><b>${i+1}.</b> ${esc(q.q)} <span class="pts"><span class="points-blank"></span> / 1 P</span></div>${q.choices?`<div class="options">${q.choices.map((c,j)=>`<span>□ ${esc(c)}</span>`).join('')}</div>`:`<div class="answer-space"></div>`}</article>`).join('');
+ const questions=qs.map((q,i)=>`<article class="item"><div class="question-title"><b>${i+1}.</b> ${esc(q.q)} <span class="pts"><span class="points-blank"></span> / 1 P</span></div>${t.id==='algo-test'?renderAlgoPrintBody(q):q.choices?`<div class="options">${q.choices.map((c,j)=>`<span>□ ${esc(c)}</span>`).join('')}</div>`:`<div class="answer-space"></div>`}</article>`).join('');
  const page=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${esc(t.title)} – Druckversion</title><style>
+ .algo-print-figure svg{display:block;width:100%;height:auto;max-height:165mm}.algo-print-figure figcaption{font-size:9pt;line-height:1.5}.algo-print-figure details{display:none}
  @page{size:A4 portrait;margin:20mm 20mm 20mm 20mm}
  *{box-sizing:border-box}
  html,body{background:#fff;color:#000}
@@ -86,11 +87,12 @@ function printTest(id){
 function start(id){
  const requested=tasks.find(t=>t.id===id);
  if(!requested){alert('Dieses Modul ist nicht verfügbar. Bitte wähle es erneut aus.');return false}
- if(requested.mode==='Test'){
+ if(requested.mode==='Test'&&requested.id!=='algo-test'){
   if(!checkTestCode(id))return;
  }
  resetActivityState();
  current=requested;
+ if(current.id==='algo-test'){startAlgoPreparation();return true}
  activityModes[current.mode].start();
  return true;
 }
@@ -107,13 +109,14 @@ function illustrate(slide){
 function notebookId(){return current.id}
 function structuredNote(text){return escapeHTML(text).split('\n').map(line=>{const m=line.match(/^([^:]{3,52}):\s*(.+)$/);return m?`<p class="note-line"><strong class="note-term">${m[1]}:</strong> ${m[2]}</p>`:`<p class="note-line">${line}</p>`}).join('')}
 function notebookCard(){const positions=notebookPositions[notebookId()]||[];const index=positions.indexOf(lessonPage);if(index<0)return '';const e=notebookEntries[notebookId()][index];return `<div class="notebook-card"><h3>📒 Heftereintrag ${index+1}: ${escapeHTML(e.title)}</h3><div class="notebook-text">${structuredNote(e.text)}</div><p class="notebook-hint">Schreibe die Überschrift auf. Unterstreiche die fett markierten Fachbegriffe und übernimm die Erklärungen und Beispiele.</p></div>`}
-function printNotebook(){const entries=notebookEntries[notebookId()]||[];$('notebookPrint').innerHTML=`<div class="print-kicker">FRAU SALLIERS LERNWELT · MERKBLATT</div><h1>${escapeHTML(current.topic)}</h1><div class="print-meta"><span>Name: _________________________</span><span>Klasse: ______</span><span>Datum: __________</span></div><p class="print-intro">Die wichtigsten Merkteile zum Lernen und Nachschlagen.</p>${entries.map((e,i)=>`<section class="print-task"><h2><span class="print-number">${i+1}</span> ${escapeHTML(e.title)}</h2><div class="print-memory"><strong>Wichtige Begriffe und Beispiele</strong><p>${structuredNote(e.text)}</p></div></section>`).join('')}`;document.body.classList.add('print-notebook');window.print()}
+function printNotebook(){const entries=notebookEntries[notebookId()]||[];$('notebookPrint').innerHTML=`<div class="print-kicker">FRAU SALLIERS LERNWELT · MERKBLATT</div><h1>${escapeHTML(current.topic)}</h1><div class="print-meta"><span>Name: _________________________</span><span>Klasse: ______</span><span>Datum: __________</span></div><p class="print-intro">Die wichtigsten Merkteile zum Lernen und Nachschlagen.</p>${entries.map((e,i)=>`<section class="print-task"><h2><span class="print-number">${i+1}</span> ${escapeHTML(e.title)}</h2><div class="print-memory"><strong>Wichtige Begriffe und Beispiele</strong><div>${structuredNote(e.text)}</div></div></section>`).join('')}`;document.body.classList.add('print-notebook');window.print()}
 window.addEventListener('afterprint',()=>document.body.classList.remove('print-notebook'));
 function renderLesson(){const slides=current.slides,slide=slides[lessonPage],response=lessonResponses[lessonPage];$('lessonContent').innerHTML=`<p class="subheading">${escapeHTML(current.subject)} · Klasse ${selectedGrade||current.grades[0]} · ${escapeHTML(current.topic)}</p><div class="progress-track"><div class="progress-fill" style="width:${(lessonPage+1)/slides.length*100}%"></div></div><p class="muted small">Lernseite ${lessonPage+1} von ${slides.length}</p><div class="notebook-tools"><button class="secondary" id="printNotebook" type="button">🖨️ Alle Merkteile für den Hefter drucken / als PDF</button></div><div class="lesson-card"><h1>${escapeHTML(slide.title)}</h1>${slide.sub?`<h3>${escapeHTML(slide.sub)}</h3>`:''}${slide.body?`<p>${escapeHTML(slide.body)}</p>`:''}${(slide.visual||slide.images)?`<div class="lesson-visual"><div class="illustration">${illustrate(slide)}</div>${slide.caption&&slide.caption!==slide.visual?`<p class="visual-caption">${escapeHTML(slide.caption)}</p>`:''}</div>`:''}${notebookCard()}${slide.note?`<div class="lesson-note"><strong>💡 Merke:</strong> ${escapeHTML(slide.note)}</div>`:''}${slide.question?`<div class="check-card"><h3>🧠 Jetzt bist du dran!</h3><p><strong>${escapeHTML(slide.question)}</strong></p>${slide.choices.map((c,i)=>`<label class="choice"><input type="radio" name="lessonAnswer" value="${i}" ${response?.choice===i?'checked':''}> ${escapeHTML(c)}</label>`).join('')}<button id="checkAnswer" class="secondary">Antwort überprüfen</button><div id="lessonFeedback" aria-live="polite">${response?.checked?feedback(slide,response.choice):''}</div></div>`:''}</div>`;
 $('printNotebook').addEventListener('click',printNotebook);$('lessonPrev').disabled=lessonPage===0;$('lessonNext').textContent=lessonPage===slides.length-1?'Jetzt üben →':'Weiter →';if(slide.question){$('checkAnswer').addEventListener('click',()=>{const selected=document.querySelector('input[name="lessonAnswer"]:checked');if(!selected){alert('Wähle zuerst eine Antwort aus.');return}lessonResponses[lessonPage]={choice:Number(selected.value),checked:true};$('lessonFeedback').innerHTML=feedback(slide,Number(selected.value))})}}
 function feedback(slide,choice){return choice===slide.answer?`<p class="good"><strong>✓ Richtig!</strong> ${escapeHTML(slide.why)}</p>`:`<p class="bad"><strong>Noch nicht ganz.</strong> ${escapeHTML(slide.hint)} Versuche es noch einmal.</p>`}
 let algoOrderSelections={};
 function renderWork(){
+ if(current.topic==='Algorithmen')return renderAlgoWork();
  const isPractice=!!practiceState;
  // Reihenfolge-Auswahl wird je Aufgabenansicht neu aufgebaut.
  algoOrderSelections={};
@@ -147,6 +150,7 @@ function normalize(s){return String(s).trim().replace(/\s+/g,'').replace(/^0+(?=
  if(current)activityEngines[current.engine].finish();
 }
 function finishQuestions(){
+ if(current.topic==='Algorithmen')return finishAlgoActivity();
  if(practiceState){finishPractice();return}
  const name=$('student').value.trim();if(!name){alert('Bitte gib zuerst deinen Namen ein.');$('student').focus();return}
  const answers=evaluate(current.questions);if(answers.some(a=>!a.given)&&!confirm('Einige Antworten fehlen. Trotzdem abgeben?'))return;
@@ -214,8 +218,6 @@ const activityModes={
  Test:{label:'📝 Testen',tag:'testtag',action:'Test öffnen',start(){activityEngines[current.engine].start()}}
 };
 const activityEngines={
- bookWorkbook:{start:startBookWorkbook,finish:finishBookWorkbook},
- sourceWorkbook:{start:startSourceWorkbook,finish:finishSourceWorkbook},
  questions:{
   start(){practiceState=current.mode==='Übung'?{page:0,scores:[],answers:[]}:null;renderWork();show('work')},
   finish:finishQuestions
@@ -224,7 +226,7 @@ const activityEngines={
  hardwareTest:{start:hwStartTest,finish:hwFinishTest}
 };
 function resetActivityState(){
- practiceState=null;lessonPage=0;lessonResponses={};algoOrderSelections={};
+ algoPhase=null;practiceState=null;lessonPage=0;lessonResponses={};algoOrderSelections={};
  hwStage=0;hwAnswers=[];hwName='';sortStage=0;sortAssignments={};selectedCard=null;sortOrder=[];
  $('nextLevel')?.remove();$('screenshotNotice').style.display='none';
  document.body.classList.remove('print-notebook','print-book-sources');
@@ -242,7 +244,7 @@ function initializeActivities(){
   if(ids.has(task.id)||!activityModes[task.mode])throw new Error('Ungültige Modulregistrierung: '+task.id);
   ids.add(task.id);
   Object.assign(task,lessons[task.id]||{});
-  task.engine=task.bookWorkbook?'bookWorkbook':task.workbook?'sourceWorkbook':task.id==='hardware-practice'?'hardwarePractice':task.id==='hardware-test'?'hardwareTest':'questions';
+  task.engine=task.id==='hardware-practice'?'hardwarePractice':task.id==='hardware-test'?'hardwareTest':'questions';
   if(task.mode==='Test')task.questions=task.id==='hardware-test'?HW_TEST:TEST_QUESTIONS[task.id];
   if(task.mode==='Lernen'&&(!task.slides?.length||!tasks.some(t=>t.id===task.practiceId&&t.mode==='Übung')))throw new Error('Lernmodul ohne Seiten oder Übung: '+task.id);
   if(task.mode==='Übung'&&task.engine==='questions'&&(!task.pages?.length||task.pages.some(p=>!p.length)))throw new Error('Übung ohne Aufgaben: '+task.id);

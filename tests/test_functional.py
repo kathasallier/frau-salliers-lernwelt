@@ -45,11 +45,23 @@ class LearningWorldTests(unittest.TestCase):
         self.page = self.browser.new_page()
         self.errors = []
         self.page.on('pageerror', lambda error: self.errors.append(str(error)))
+        self.blocked_requests = []
+        if os.environ.get('LERNWELT_OFFLINE_HTML'):
+            html = Path(os.environ['LERNWELT_OFFLINE_HTML']).read_text(encoding='utf-8')
+            def offline_route(route):
+                if route.request.is_navigation_request() and route.request.url == self.url:
+                    route.fulfill(status=200, content_type='text/html; charset=utf-8', body=html)
+                else:
+                    self.blocked_requests.append(route.request.url)
+                    route.abort()
+            self.page.route('**/*', offline_route)
+            self.page.context.set_offline(True)
         self.assertEqual(self.page.goto(self.url).status, 200)
 
     def tearDown(self):
         self.page.close()
         self.assertEqual(self.errors, [], 'Keine unbehandelten JavaScript-Fehler')
+        self.assertEqual(self.blocked_requests, [], 'Die Einzeldatei darf keine weiteren Ressourcen anfordern')
 
     def metadata(self, task_id):
         return self.page.evaluate('(id)=>{const t=tasks.find(t=>t.id===id);return {subject:t.subject,grade:t.grades[0],topic:t.topic}}', task_id)
@@ -68,7 +80,16 @@ class LearningWorldTests(unittest.TestCase):
     def answer_questions(self, questions, prefix='q'):
         for i, question in enumerate(questions):
             field = self.page.locator(f'#{prefix}{i}')
-            if question.get('order'):
+            if question.get('parts'):
+                for j, part in enumerate(question['parts']):
+                    partfield = self.page.locator(f'#{prefix}{i}-part{j}')
+                    if part.get('choices'):
+                        partfield.select_option(part['a'])
+                    else:
+                        partfield.fill(part['a'])
+            elif question.get('free'):
+                field.fill(question['sample'])
+            elif question.get('order'):
                 for value in question['a'].split(' → '):
                     index = question['order'].index(value)
                     self.page.locator(f'[data-order-q="{i}"][data-order-v="{index}"]').click()
@@ -95,7 +116,7 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_navigation_all_modules_and_empty_grades(self):
         ids = self.page.evaluate('tasks.map(t=>t.id)')
-        self.assertEqual(len(ids), 15)
+        self.assertEqual(len(ids), 13)
         for task_id in ids:
             with self.subTest(module=task_id):
                 self.catalog(task_id)
@@ -171,10 +192,11 @@ class LearningWorldTests(unittest.TestCase):
                     self.page.locator('#finish').click()
                     self.assertTrue(self.page.locator('#results').is_visible())
                     self.assert_result_print()
-                    self.assertIn(f'{len(questions)} / {len(questions)} Punkte', self.page.locator('#resultBody').inner_text())
+                    graded = sum(not q.get('free') for q in questions)
+                    self.assertIn(f'{graded} / {graded} Punkte', self.page.locator('#resultBody').inner_text())
                     if i < len(pages) - 1:
                         self.page.locator('#nextLevel').click()
-                maximum = sum(map(len, pages))
+                maximum = sum(not q.get('free') for page in pages for q in page)
                 self.assertIn(f'{maximum} / {maximum} Punkte', self.page.locator('#resultBody').inner_text())
                 self.assertEqual(self.page.locator('#nextLevel').count(), 0)
                 self.page.locator('#again').click()
@@ -220,15 +242,18 @@ class LearningWorldTests(unittest.TestCase):
             with self.subTest(module=task_id):
                 self.catalog(task_id)
                 button = self.page.locator(f'[data-task="{task_id}"]')
+                if task_id == 'algo-test':
+                    button.click()
+                    button = self.page.locator('#beginAlgoTest')
                 self.page.once('dialog', lambda d: d.dismiss())
                 button.click()
-                self.assertTrue(self.page.locator('#home').is_visible())
+                self.assertTrue(self.page.locator('#work' if task_id=='algo-test' else '#home').is_visible())
                 def wrong_dialog(dialog):
                     dialog.accept('FALSCH') if dialog.type == 'prompt' else dialog.accept()
                 self.page.on('dialog', wrong_dialog)
                 button.click()
                 self.page.remove_listener('dialog', wrong_dialog)
-                self.assertTrue(self.page.locator('#home').is_visible())
+                self.assertTrue(self.page.locator('#work' if task_id=='algo-test' else '#home').is_visible())
                 code = self.page.evaluate('(id)=>TEST_CODES[id]', task_id)
                 self.page.once('dialog', lambda d: d.accept(code))
                 button.click()
@@ -332,7 +357,7 @@ class LearningWorldTests(unittest.TestCase):
             self.assertIn(step, diagram.text_content())
         self.page.evaluate('window.print=()=>{}')
         self.page.locator('#printNotebook').click()
-        self.assertIn('sechs Aktionen', self.page.locator('#notebookPrint').text_content())
+        self.assertIn('Sechs Aktionsrechtecke', self.page.locator('#notebookPrint').text_content())
         self.assertIn('Mund ausspülen', self.page.locator('#notebookPrint').text_content())
         self.assert_pdf(self.page)
         self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
@@ -340,228 +365,144 @@ class LearningWorldTests(unittest.TestCase):
         self.page.locator('#printNotebook').click()
         self.assertIn('Schritt für Schritt:', self.page.locator('#notebookPrint').text_content())
 
-    def test_source_workbook_first_seven_tasks_print_and_restart(self):
-        self.open('algo-source-practice')
-        self.assertEqual(self.page.locator('.source-workbook section.question').count(), 14)
-        self.page.locator('#finish').click()
-        self.assertIn('0 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.assertIn('mindestens fünf', self.page.locator('#wb-feedback-tea').text_content())
-        for i, answer in enumerate(['Ja','Nein','Ja','Ja','Nein']):
-            self.page.locator(f'#wb-class-{i}').select_option(answer)
-        tea = 'Wasser einfüllen.\nWasser erhitzen.\nTeebeutel in eine Tasse legen.\nWasser eingießen.\nTee ziehen lassen.'
-        self.page.locator('#wb-tea').fill(tea)
-        for i in range(3):
-            self.page.locator(f'#wb-clear-{i}').fill('Eine konkrete Anweisung zur Selbstkontrolle.')
-        for i, rank in enumerate(['5','1','3','4','2']):
-            self.page.locator(f'#wb-jam-{i}').select_option(rank)
-        for i, symbol in enumerate(['Raute','Oval','Rechteck']):
-            self.page.locator(f'#wb-symbol-{i}').select_option(symbol)
-        self.page.locator('#wb-count').fill('6')
-        actions=['Stundenplan für morgen ansehen','Benötigte Bücher auswählen',
-                 'Bücher <morgen> einpacken','Gefülltes Federmäppchen einpacken']
-        for i, action in enumerate(actions):
-            self.page.locator(f'#wb-action-{i}').fill(action)
-        self.assertEqual(self.page.locator('#workbookDiagram [data-flow-node="action"]').count(), 4)
-        self.assertIn('Bücher <morgen> einpacken', self.page.locator('#workbookDiagram').text_content())
-        self.assertEqual(self.page.locator('#workbookDiagram morgen').count(), 0)
-        self.page.locator('#wb-add-action').click()
-        self.assertEqual(self.page.locator('#workbookActions input').count(), 5)
-        self.page.locator('#wb-remove-action').click()
-        self.assertEqual(self.page.locator('#workbookActions input').count(), 4)
-        self.assertTrue(self.page.locator('#wb-remove-action').is_disabled())
-        self.page.locator('#finish').click()
-        self.assertIn('10 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.assertIn('keine inhaltliche Bewertung', self.page.locator('#wb-feedback-tea').text_content())
-        self.assertIn('nicht automatisch bewertet', self.page.locator('#wb-feedback-diagram').text_content())
-        self.assertEqual(self.page.locator('#wb-tea').input_value(), tea)
-        self.page.set_viewport_size({'width':390,'height':844})
-        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
-        self.page.evaluate('window.print=()=>{window.sourcePrintCalled=true}')
-        self.page.locator('#workbookPrint').click()
-        self.assertTrue(self.page.evaluate('window.sourcePrintCalled'))
-        self.page.emulate_media(media='print')
-        self.assertTrue(self.page.locator('[data-print-for="wb-tea"]').is_visible())
-        self.assertIn(tea, self.page.locator('[data-print-for="wb-tea"]').text_content())
-        self.assertTrue(self.page.locator('#workbookDiagram svg').is_visible())
-        self.assertFalse(self.page.locator('#workbookActions').is_visible())
-        self.assert_pdf(self.page)
-        self.page.emulate_media(media='screen')
-        self.page.locator('#reset').click()
-        self.assertEqual(self.page.locator('#wb-tea').input_value(), '')
-        self.assertEqual(self.page.locator('#workbookActions input').count(), 4)
-        self.assertIn('Noch nicht ausgewertet', self.page.locator('#workbookSummary').text_content())
-        self.open('binary-practice')
-        self.assertTrue(self.page.locator('#q0').is_visible())
-        self.assertEqual(self.page.locator('.source-workbook').count(), 0)
+    def test_independent_learning_without_external_material(self):
+        import re
+        references = re.compile(r'\b(?:Buch|Buchseite[n]?|Buchabbildung[en]*|Übungsheft|Unterlagen|Originalfoto|Lösungsseite)\b', re.I)
+        data = self.page.evaluate('''()=>({
+            tasks:tasks.map(t=>[t.title,t.description]),
+            slides:tasks.filter(t=>t.mode==='Lernen').flatMap(t=>t.slides),
+            notes:notebookEntries,
+            captions:Object.values(lessonFigures).flatMap(group=>Object.values(group).map(v=>v.caption))
+        })''')
+        import json
+        self.assertIsNone(references.search(json.dumps(data, ensure_ascii=False)))
+        for task_id in ['algo-general-practice','algo-display-practice','algo-review-practice','algo-test']:
+            self.open(task_id)
+            self.assertIsNone(references.search(self.page.locator('#work').inner_text()))
+        self.assertEqual(self.page.locator('a[href*="assets/sources"]').count(), 0)
 
-    def test_source_conditions_loops_and_five_card_sorting(self):
-        self.open('algo-display-learn')
-        slides = self.page.evaluate('current.slides')
-        for i, slide in enumerate(slides):
-            if slide['title'] == 'Wenn – dann – sonst':
-                self.assertIn('Zur Schule gehen', self.page.locator('.lesson-figure').text_content())
-            if slide['title'] == 'Schleifen: etwas wiederholen':
-                text = self.page.locator('.lesson-figure').text_content()
-                for word in ['Aufgaben','fertig?','Eine Aufgabe','Spielen']:
-                    self.assertIn(word, text)
-            if slide['title'] in ['Bubble Sort','Insertion Sort']:
-                rows = self.page.locator('[data-sort-row]')
-                self.assertEqual(rows.count(), 5)
-                expected = [[5,2,4,1,3],[2,5,4,1,3],[2,4,5,1,3]]
-                expected += [[2,4,1,5,3],[2,4,1,3,5]] if slide['title']=='Bubble Sort' else [[1,2,4,5,3],[1,2,3,4,5]]
-                for n, values in enumerate(expected):
-                    self.assertEqual(rows.nth(n).locator('text').all_text_contents(), [str(v) for v in values])
-            if i < len(slides)-1:
-                self.page.locator('#lessonNext').click()
-        self.open('algo-source-practice')
-        for id_,text in [('wb-weather-if','das Wetter schön ist'),('wb-weather-yes','spiele ich draußen'),('wb-weather-no','lese ich drinnen'),('wb-traffic-question','Ist die Ampel grün?'),('wb-traffic-yes','Losgehen'),('wb-traffic-no','Warten')]:
-            self.page.locator('#'+id_).fill(text)
-        self.assertEqual(self.page.locator('#workbookTrafficDiagram [data-flow-node="decision"]').count(), 1)
-        self.assertEqual(self.page.locator('#workbookTrafficDiagram [data-flow-edge="retry"]').count(), 1)
-        for label in ['Ist die Ampel grün?','Losgehen','Warten','Start','Ende','Ja','Nein']:
-            self.assertIn(label, self.page.locator('#workbookTrafficDiagram').text_content())
-        self.page.locator('#wb-loop-count').fill('3')
-        self.page.locator('#finish').click()
-        self.assertTrue(self.page.locator('#wb-feedback-loop').evaluate('(el)=>el.classList.contains("bad")'))
-        self.page.locator('#wb-loop-count').fill('4')
-        for id_,row in [('wb-sort-1','2,1,4,3,5'),('wb-sort-2','[2, 1, 3, 4, 5]'),('wb-sort-3','1 2 3 4 5'),('wb-sort-final','1;2;3;4;5')]:
-            self.page.locator('#'+id_).fill(row)
-        for i,answer in enumerate(['Ja','Nein','Ja','Ja','Nein']):
-            self.page.locator(f'#wb-class-{i}').select_option(answer)
-        for i,rank in enumerate(['5','1','3','4','2']):
-            self.page.locator(f'#wb-jam-{i}').select_option(rank)
-        for i,symbol in enumerate(['Raute','Oval','Rechteck']):
-            self.page.locator(f'#wb-symbol-{i}').select_option(symbol)
-        self.page.locator('#wb-count').fill('6')
-        self.page.locator('#finish').click()
-        self.assertIn('15 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.assertIn('nicht automatisch inhaltlich bewertet', self.page.locator('#wb-feedback-weather').text_content())
-        self.assertIn('nicht automatisch inhaltlich bewertet', self.page.locator('#wb-feedback-traffic').text_content())
-        self.page.locator('#wb-sort-1').fill('2,4,1,3,5')
-        self.page.locator('#finish').click()
-        self.assertIn('14 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.page.set_viewport_size({'width':390,'height':844})
-        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+    def test_mixed_question_bank_has_no_repeats_and_balanced_types(self):
+        data = self.page.evaluate('''()=>({
+            banks:[algoPracticeGeneral,algoPracticeDisplay,algoPracticeReview],
+            prep:algoPreparation,test:algoTestQuestions,
+            ids:tasks.map(t=>t.id)
+        })''')
+        self.assertNotIn('algo-source-practice',data['ids'])
+        self.assertNotIn('algo-book-practice',data['ids'])
+        self.assertEqual(sum(q.get('free',False) for bank in data['banks'] for page in bank for q in page),12)
+        questions=[q for bank in data['banks'] for page in bank for q in page]+data['prep']+data['test']
+        self.assertEqual(len(questions),62)
+        self.assertEqual(len({q['id'] for q in questions}),62)
+        self.assertEqual(len({q['q'].strip().lower() for q in questions}),62)
+        self.assertEqual([len(bank) for bank in data['banks']],[3,3,3])
+        for bank in data['banks']:
+            flat=[q for page in bank for q in page]
+            self.assertTrue(any(q.get('free') for q in flat))
+            self.assertTrue(any(q.get('order') for q in flat))
+            self.assertTrue(any(q.get('parts') for q in flat))
+        self.assertEqual(len(data['test']),20)
+        self.assertFalse(any(q.get('free') for q in data['test']))
+        self.assertTrue(all(q.get('choices') or q.get('order') or (q.get('parts') and all(p.get('choices') for p in q['parts'])) for q in data['test']))
+        self.assertTrue(any(q.get('figure') for q in data['test']))
+
+    def test_preparation_self_control_test_gate_and_print(self):
+        self.open('algo-test')
+        self.assertEqual(self.page.evaluate('algoPhase'),'preparation')
+        questions=self.page.evaluate('algoPreparation')
+        self.answer_questions(questions)
         self.page.evaluate('window.print=()=>{}')
-        self.page.locator('#workbookPrint').click()
+        self.page.locator('#printAlgoWork').click()
         self.page.emulate_media(media='print')
-        self.assertTrue(self.page.locator('#workbookTrafficDiagram svg').is_visible())
-        self.assertIn('4', self.page.locator('[data-print-for="wb-loop-count"]').text_content())
-        self.assertIn('1;2;3;4;5', self.page.locator('[data-print-for="wb-sort-final"]').text_content())
+        self.assertTrue(self.page.locator('.algo-print-value').first.is_visible())
         self.assert_pdf(self.page)
         self.page.emulate_media(media='screen')
+        self.page.locator('#finish').click()
+        self.assertIn('4 / 4 Punkte',self.page.locator('#resultBody').text_content())
+        self.assertEqual(self.page.locator('.self-feedback').count(),2)
+        self.assertIn('keine automatische Inhaltsbewertung',self.page.locator('#resultBody').text_content())
+        self.assert_result_print()
+        self.page.once('dialog',lambda d:d.dismiss())
+        self.page.locator('#nextLevel').click()
+        self.assertTrue(self.page.locator('#results').is_visible())
+        self.assertEqual(self.page.evaluate('algoPhase'),'preparation')
+        code=self.page.evaluate('TEST_CODES["algo-test"]')
+        self.page.once('dialog',lambda d:d.accept(code))
+        self.page.locator('#nextLevel').click()
+        self.assertEqual(self.page.evaluate('algoPhase'),'test')
+        self.assertEqual(self.page.locator('.algo-task').count(),20)
+        self.assertEqual(self.page.locator('.algo-task textarea, .algo-task input:not([type=hidden])').count(),0)
         self.page.locator('#reset').click()
-        self.assertEqual(self.page.locator('#wb-loop-count').input_value(), '')
-        self.assertEqual(self.page.locator('#wb-sort-final').input_value(), '')
+        self.assertEqual(self.page.evaluate('algoPhase'),'preparation')
 
-    def test_source_insertion_search_detective_glossary_and_solutions(self):
+    def test_order_reset_list_grading_mobile_and_free_preview(self):
+        self.open('algo-general-practice')
+        self.page.locator('[data-order-q="2"]').first.click()
+        self.assertTrue(self.page.locator('#q2').input_value())
+        self.page.locator('[data-algo-order-reset="2"]').click()
+        self.assertEqual(self.page.locator('#q2').input_value(),'')
+        self.assertFalse(self.page.locator('[data-order-q="2"]').first.is_disabled())
+        questions=self.page.evaluate('current.pages[0]')
+        self.answer_questions(questions)
+        self.page.locator('#q3').fill('<img src=x onerror=alert(1)>\nEine eigene Anweisung.')
+        self.page.locator('#finish').click()
+        self.assertIn('3 / 3 Punkte',self.page.locator('#resultBody').text_content())
+        self.assertEqual(self.page.locator('#resultBody img').count(),0)
+        self.assertEqual(self.page.locator('.self-feedback .bad').count(),0)
+        self.open('algo-display-practice')
+        for stage in range(3):
+            questions=self.page.evaluate('current.pages[practiceState.page]')
+            self.answer_questions(questions)
+            if stage==0:
+                self.assertEqual(self.page.locator('#algoPreview3 [data-flow-edge="retry"]').count(),1)
+            if stage==2:
+                self.page.locator('#q1-part0').fill('[2; 5; 4; 1; 3]')
+                self.page.locator('#q1-part1').fill('2,4,5,3,1')
+            self.page.set_viewport_size({'width':390,'height':844})
+            self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+            self.page.locator('#finish').click()
+            if stage<2:self.page.locator('#nextLevel').click()
+        self.assertTrue(self.page.locator('#resultBody .bad').count()>0)
+        self.assertIn('2 / 3 Punkte',self.page.locator('#resultBody').text_content())
+
+    def test_embedded_figures_keep_unique_ids_after_lesson_navigation(self):
         self.open('algo-display-learn')
-        index = self.page.evaluate('current.slides.findIndex(s=>s.title==="Lineare Suche")')
-        for _ in range(index):
-            self.page.locator('#lessonNext').click()
-        cards = self.page.locator('[data-search-card]')
-        self.assertEqual(cards.evaluate_all('(nodes)=>nodes.map(n=>n.dataset.searchCard)'), ['7','3','9','1','5','8','2'])
-        self.assertEqual(self.page.locator('[data-search-checked="true"]').count(), 5)
-        self.assertEqual(self.page.locator('[data-search-checked="false"]').count(), 2)
-        self.open('algo-source-practice')
-        self.assertEqual(self.page.locator('.workbook-glossary dt').count(), 13)
-        self.assertIn('Lineare Suche', self.page.locator('.workbook-glossary').text_content())
-        self.assertEqual(self.page.locator('#wb-tea + .workbook-print-value + .workbook-feedback + details li').count(), 7)
-        for i,row in enumerate(['1,4,5,2,3','1,4,5,2,3','1,2,4,5,3','1,2,3,4,5']):
-            self.page.locator(f'#wb-insertion-{i}').fill(row)
-        self.page.locator('#wb-search-cards').fill('4\n9\n2\n7\n6')
-        self.page.locator('#wb-search-count').fill('5')
-        self.page.locator('#wb-detective').fill('Schnürsenkel aufnehmen. Schlaufen bilden. Schleife zubinden. Festziehen.')
+        self.page.evaluate('lessonPage=11;renderLesson()')
+        self.page.locator('#lessonBack').click()
+        self.page.locator('[data-task="algo-display-practice"]').click()
+        self.answer_questions(self.page.evaluate('current.pages[0]'))
         self.page.locator('#finish').click()
-        self.assertIn('6 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.assertIn('Reihenfolge unverändert', self.page.locator('#wb-feedback-insertion').text_content())
-        self.assertIn('nicht automatisch inhaltlich bewertet', self.page.locator('#wb-feedback-detective').text_content())
-        self.page.locator('#wb-insertion-1').fill('1,2,3,4,5')
-        self.page.locator('#wb-search-cards').fill('4,9,2,7,6,1,5')
-        self.page.locator('#finish').click()
-        self.assertIn('4 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.assertTrue(self.page.locator('#wb-feedback-search').evaluate('(el)=>el.classList.contains("bad")'))
-        self.page.locator('#wb-insertion-1').fill('1,4,5,2,3')
-        self.page.locator('#wb-search-cards').fill('4,9,2,7,6')
-        for i,answer in enumerate(['Ja','Nein','Ja','Ja','Nein']):
-            self.page.locator(f'#wb-class-{i}').select_option(answer)
-        for i,rank in enumerate(['5','1','3','4','2']):
-            self.page.locator(f'#wb-jam-{i}').select_option(rank)
-        for i,symbol in enumerate(['Raute','Oval','Rechteck']):
-            self.page.locator(f'#wb-symbol-{i}').select_option(symbol)
-        for id_,answer in [('wb-count','6'),('wb-loop-count','4'),('wb-sort-1','2,1,4,3,5'),('wb-sort-2','2,1,3,4,5'),('wb-sort-3','1,2,3,4,5'),('wb-sort-final','1,2,3,4,5')]:
-            self.page.locator('#'+id_).fill(answer)
-        self.page.locator('#finish').click()
-        self.assertIn('21 / 21 richtig', self.page.locator('#workbookSummary').text_content())
-        self.page.set_viewport_size({'width':390,'height':844})
-        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
-        self.page.evaluate('window.print=()=>{}')
-        self.page.locator('#workbookPrint').click()
+        self.page.locator('#nextLevel').click()
+        ids=self.page.locator('svg [id]').evaluate_all('(nodes)=>nodes.map(n=>n.id)')
+        self.assertEqual(len(ids),len(set(ids)))
+        missing=self.page.evaluate('''()=>[...document.querySelectorAll('svg path[marker-end]')].filter(p=>{
+            const id=p.getAttribute('marker-end').match(/#([^)]*)/)[1];
+            return !document.getElementById(id);
+        }).length''')
+        self.assertEqual(missing,0)
         self.page.emulate_media(media='print')
-        for id_ in ['wb-insertion-0','wb-search-cards','wb-search-count','wb-detective']:
-            self.assertTrue(self.page.locator(f'[data-print-for="{id_}"]').is_visible())
-        self.assertTrue(self.page.locator('.workbook-glossary').is_visible())
         self.assert_pdf(self.page)
-        self.page.emulate_media(media='screen')
-        self.page.locator('#reset').click()
-        for id_ in ['wb-insertion-0','wb-search-cards','wb-search-count','wb-detective']:
-            self.assertEqual(self.page.locator('#'+id_).input_value(), '')
 
-    def test_book_tasks_conditions_story_photos_and_print(self):
-        self.open('algo-book-practice')
-        self.assertEqual(self.page.locator('.book-workbook section.question').count(), 7)
-        for reference in self.page.locator('.book-reference').all():
-            reference.evaluate('(el)=>el.open=true')
-            reference.locator('img').scroll_into_view_if_needed()
-        self.page.wait_for_function('[...document.querySelectorAll(".book-reference img")].every(i=>i.complete&&i.naturalWidth>0)')
-        self.assertEqual(self.page.locator('.book-reference img').count(), 4)
-        self.page.locator('#finish').click()
-        self.assertIn('0 / 4 richtig', self.page.locator('#bookSummary').text_content())
-        for i,answer in enumerate(['Eindeutigkeit','Ausführbarkeit','Endlichkeit']):
-            self.page.locator(f'#bk-condition-{i}').select_option(answer)
-        for i,rank in enumerate(['1','4','2','3']):
-            self.page.locator(f'#bk-story-{i}').select_option(rank)
-        story=self.page.locator('#bookStoryDiagram [data-flow-node="action"]')
-        self.assertEqual(story.count(), 4)
-        self.assertIn('Bahnticket', self.page.locator('#bookStoryDiagram').text_content())
-        for i,command in enumerate(['Gehe geradeaus zum Kühlregal.','Biege nach dem Kühlregal links ab.','Bleibe vor dem Nudelregal stehen.']):
-            self.page.locator(f'#bk-command-{i}').fill(command)
-        free=['bk-hands-description','bk-hands-commands','bk-hands-properties','bk-hands-swap','bk-escape','bk-directions-review','bk-maze','bk-eva','bk-program']
-        for id_ in free:
-            self.page.locator('#'+id_).fill('Meine eigene Beschreibung und Begründung.')
-        self.page.locator('#finish').click()
-        self.assertIn('4 / 4 richtig', self.page.locator('#bookSummary').text_content())
-        self.assertIn('nicht automatisch inhaltlich bewertet', self.page.locator('#bookSummary').text_content())
-        self.page.locator('#bk-story-0').select_option('2')
-        self.page.locator('#finish').click()
-        self.assertIn('3 / 4 richtig', self.page.locator('#bookSummary').text_content())
-        self.assertEqual(self.page.locator('#bookStoryDiagram svg').count(), 0)
-        self.page.locator('#bk-story-0').select_option('1')
-        self.page.set_viewport_size({'width':390,'height':844})
-        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
-        self.page.evaluate('window.print=()=>{window.bookPrinted=true}')
-        self.page.locator('#bookPrint').click()
-        self.assertTrue(self.page.evaluate('window.bookPrinted'))
-        self.page.emulate_media(media='print')
-        self.assertTrue(self.page.locator('[data-print-for="bk-maze"]').is_visible())
-        self.assertTrue(self.page.locator('#bookCommandsDiagram svg').is_visible())
-        self.assertFalse(self.page.locator('.book-reference').first.is_visible())
-        self.assert_pdf(self.page)
-        self.page.emulate_media(media='screen')
-        self.page.locator('#bookPrintSources').check()
-        self.page.locator('#bookPrint').click()
-        self.page.emulate_media(media='print')
-        self.assertTrue(self.page.locator('.book-reference').first.is_visible())
-        self.assert_pdf(self.page)
-        self.page.emulate_media(media='screen')
-        self.assertFalse(self.page.locator('body').evaluate('(el)=>el.classList.contains("print-book-sources")'))
-        self.page.locator('#reset').click()
-        self.assertEqual(self.page.locator('#bk-maze').input_value(), '')
-        self.assertEqual(self.page.locator('#bk-condition-0').input_value(), '')
-        self.assertFalse(self.page.locator('#bookPrintSources').is_checked())
-        self.open('algo-source-practice')
-        self.assertEqual(self.page.locator('.source-workbook section.question').count(), 14)
-        self.assertEqual(self.page.locator('.book-workbook').count(), 0)
+    def test_notes_are_ordered_distinct_and_linked_to_lesson_pages(self):
+        expected={
+            'algo-general-learn':['Endlichkeit: ein erreichbares Ende','Die Sequenz','Vom Algorithmus zum Programm'],
+            'algo-display-learn':['Flussdiagramme zeichnen','Zählschleife und Bedingungsschleife','Insertion Sort'],
+            'algo-summary':['Das Wichtigste zu Algorithmen','Drei Ablaufarten','Bereit für den Test?']
+        }
+        for task_id,titles in expected.items():
+            self.open(task_id)
+            data=self.page.evaluate('''()=>({notes:notebookEntries[current.id],positions:notebookPositions[current.id],titles:current.slides.map(s=>s.title)})''')
+            self.assertEqual([data['titles'][i] for i in data['positions']],titles)
+            self.assertEqual(len({n['title'] for n in data['notes']}),3)
+            self.assertEqual(len({n['text'] for n in data['notes']}),3)
+            for position in data['positions']:
+                self.page.evaluate('(n)=>{lessonPage=n;renderLesson()}',position)
+                self.assertEqual(self.page.locator('.notebook-card').count(),1)
+                self.assertTrue(self.page.locator('.notebook-card').inner_text())
+            self.page.evaluate('window.print=()=>{}')
+            self.page.locator('#printNotebook').click()
+            self.assertEqual(self.page.locator('#notebookPrint .print-task').count(),3)
+            self.assert_pdf(self.page)
+            self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})

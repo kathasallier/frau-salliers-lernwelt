@@ -145,3 +145,24 @@ header .wrap{padding-top:7px!important;padding-bottom:7px!important;min-height:4
  .book-reference a{display:none}
  .book-reference img{max-height:230mm;object-fit:contain}
 }
+/* Eigenständige Übungspläne ohne zusätzliche Vorlagen. */
+.practice-map{max-width:650px;margin:20px auto}
+.practice-map svg{display:block;width:100%;height:auto}
+.practice-map figcaption{font-size:1rem;line-height:1.6;margin-top:10px;color:#45556b}
+@media print{.practice-map{break-inside:avoid}.practice-map svg{max-height:200mm}.practice-map figcaption{color:#111}}
+/* 0.39: gemischte Aufgaben, Vorschau und klare Trennung von Bewertung/Selbstkontrolle. */
+.algo-task label{margin-top:14px}
+.algo-task textarea{min-height:130px;resize:vertical}
+.algo-figure{max-width:560px;margin:18px auto}
+.algo-figure svg{max-height:none}
+.answer-lines{white-space:pre-wrap;overflow-wrap:anywhere}
+.self-feedback{border-left:4px solid #a48643;background:#fffdf4}
+.algo-print-value,.algo-order-print{display:none}
+@media print{
+ .algo-task select,.algo-task input,.algo-task textarea,.algo-task button{display:none!important}
+ .algo-print-value{display:block;white-space:pre-wrap;overflow-wrap:anywhere;min-height:12mm;margin:5mm 0}
+ .algo-order-print{display:block}
+ .algo-task,.self-feedback{break-inside:auto}
+ .algo-figure{break-inside:avoid}
+ .algo-figure svg{max-height:180mm}
+}

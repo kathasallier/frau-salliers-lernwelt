@@ -1,5 +1,83 @@
 # Änderungen
 
+## 0.39 – abwechslungsreiche integrierte Übungen und Testvorbereitung
+
+- Die bisherigen monotonen Algorithmus-Fragefolgen ersetzt: Übung 1–3 enthalten
+  jeweils drei Abschnitte mit vier gemischten Aufgaben, insgesamt 36 verschiedene
+  Aufgaben. Themen aus „Wissen anwenden“ und „Alltagsabläufe anwenden“ sind
+  integriert; die beiden separaten Katalogeinträge entfallen.
+- Auswahl, Zuordnung, Reihenfolgen, Rechen-/Zählaufgaben, Such-/Sortierzustände,
+  Diagramme und eigene Anweisungen werden kombiniert. Alle bekannten
+  Anwendungsthemen bleiben vertreten: Tee, Marmeladenbrot, präzise Anweisungen,
+  Geschichte, Händewaschen, Schulranzen, Ampel, Schleifen, beide Sortierverfahren,
+  lineare Suche, Schuhe binden, Wegplan, Supermarkt, Labyrinth, Wetter und EVA.
+- Der Abschlusstest beginnt mit sechs eigenständigen Vorbereitungsaufgaben.
+  Nach Zugangscode folgen 20 neue geschlossene Aufgaben ausschließlich zum
+  Auswählen, Zuordnen und Reihenfolgenlegen. Zahlen und Sortierzustände werden
+  ebenfalls ausgewählt; keine Antwort muss selbst eingetippt werden. Die 20
+  Aufgaben ergeben 20 automatisch kontrollierte Punkte, mit den
+  bisherigen Notengrenzen. Vorbereitung und Test wiederholen keine Aufgaben aus
+  den drei Übungsteilen. Insgesamt 62 eindeutige Aufgabenstellungen/IDs werden
+  beim Laden auf Duplikate geprüft.
+- Freie Texte und Pläne bleiben ausdrücklich Selbstkontrolle, mit Beispielen
+  und Prüffragen ohne automatische Inhaltsbewertung. Geschlossene Punkte und
+  freie Aufgaben werden in der Auswertung getrennt. Eine einzelne Reihenfolge
+  kann zurückgesetzt werden; Zahleneingaben akzeptieren gleichwertige Formate.
+- Alle Algorithmus-Merkteile neu gegliedert und an passende Lernseiten gebunden.
+  Vollständiges Zähneputzen-Beispiel erhalten; ungültige verschachtelte Absätze
+  in der Druckdarstellung bereinigt.
+- Aufgabenabbildungen erhalten eigene SVG-IDs, damit Pfeile nach Lernseiten-
+  Wechseln nicht auf ausgeblendete Marker verweisen. Tür-/Ausgangsöffnungen im
+  schematischen Wegplan sichtbar gemacht. Neue Übungs- und Testdruckausgaben
+  enthalten auch Diagramme und Teilfragen.
+- Hardware, Binärsystem, ihre Übungen, Tests, Lösungen, Merkteile und Testcodes
+  unverändert. Algorithmen bleibt in Klasse 6. Eigenständige Offline-Datei
+  weiterhin verfügbar. Versionierte Skript-/Stil-URLs verhindern Mischstände
+  mit älteren Browserdateien bei der Veröffentlichung.
+
+### Prüfung
+
+15 Browser-Funktionstests für alle 13 registrierten Module, jeweils gegen die
+Projektversion und die exportierte Einzeldatei bei gesperrtem Netzwerk.
+Prüfungen umfassen sämtliche Übungen, alle drei Tests, Vorbereitung und
+Zugangscode, richtige/falsche Zuordnungen und Zahlenreihen, Reihenfolge-Neustart,
+freie Texte/Diagramme, 62 eindeutige Aufgaben, Merkteilgliederung, SVG-Marker,
+Mobilansicht sowie Aufgaben-, Ergebnis-, Merkteil- und Testdruck mit PDF-Erzeugung.
+Die gemischte Aufgabenseite, Vorbereitung und Merkteile wurden visuell geprüft.
+Unbeteiligte Daten und Merkteile wurden mit 0.38 verglichen.
+
+## 0.38 – eigenständige Lernwelt und Offline-Einzeldatei
+
+- Verweise und notwendige Bezüge auf Buch, Übungsheft, Seitenzahlen und externe
+  Aufgabenabbildungen aus Lerntexten, Aufgaben, Merkteilen und Bildunterschriften
+  entfernt. Fachliche Inhalte und funktionierende Abläufe bleiben erhalten.
+- Die beiden Übungsbereiche heißen „Wissen anwenden“ und „Alltagsabläufe
+  anwenden“. Interne Modul-IDs, Antwortfelder und Auswertungsmechanismen bleiben
+  erhalten; bestehende Aufgaben, Lösungen, Testcodes, Hardware- und Binärinhalte
+  wurden mit 0.37 verglichen und sind unverändert.
+- Händewaschen ist direkt dargestellt. Wegbeschreibung und Traktor-Labyrinth
+  nutzen eigene vollständige Übungspläne statt externer Buchfotos. Das Labyrinth
+  besitzt Koordinaten und eine zugängliche Liste seiner Wege; der Hof ist
+  erreichbar. Eigene Texte und Pläne sind weiter druckbar.
+- Originalfoto-Links und die davon abhängige Druckoption entfernt. Archivierte
+  Quelldateien bleiben im Repository erhalten, werden aber nicht geladen.
+- `scripts/build_offline.py` erzeugt die einzelne Datei
+  `dist/Frau-Salliers-Lernwelt-0.38.html` mit eingebetteten Skripten, Stilen und
+  Bilddaten. Sie benötigt weder zusätzliche Dateien noch einen Server.
+
+### Prüfung
+
+14 Browser-Funktionstests bestanden gegen die Projektversion und zusätzlich
+14 gegen die exportierte Einzeldatei bei gesperrtem Netzwerk. Dabei werden
+Navigation aller 15 Module, sämtliche Übungen, Tests, eigene Texte/Diagramme,
+Mobilansicht, Neustart und Druck-/PDF-Funktionen geprüft. Jede nachgeladene
+Ressource lässt den Offline-Lauf fehlschlagen. Die neuen Übungspläne werden auf
+Erreichbarkeit und in der Druckausgabe geprüft; sichtbare Materialverweise werden
+zusätzlich gesucht. Der verwaltete Browser sperrt direkte `file://`-Navigationen;
+dieser konkrete Öffnungsweg ist dort nicht als getestet angegeben.
+
+Keine Veröffentlichung und kein Git-Push dieser Version.
+
 ## 0.37
 
 - Die Lösungsseite 18 zu Aufgaben 7–11 und die vier Buchseiten 38–41 sind

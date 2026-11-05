@@ -15,14 +15,14 @@ const lessonFigures = {
   'Algorithmen prüfen': {kind:'checklist',items:['Eindeutig?','Ausführbar?','Ein Ende vorhanden?','Reihenfolge richtig?'],caption:'Prüfe eine Anleitung mit diesen vier Fragen.'},
   'Fehlerdetektiv': {kind:'shoes',caption:'Die Socke kommt vor dem Schuh. Vertauschte Schritte passen nicht zum Ziel.'},
   'Algorithmen selbst entwickeln': {kind:'planning',caption:'Zerlege die Aufgabe, formuliere Schritte und überprüfe ihre Reihenfolge.'},
-  'Pfannkuchen: eine Sequenz': {kind:'pancakes',caption:'Zusammengefasste Buchanleitung: Erst den Teig vorbereiten, dann in der erhitzten Pfanne ausbacken.'},
-  'Händewaschen: klare Befehle': {kind:'handwash',caption:'M1 aus dem Buch: Beschreibe die Bilder mit klaren Befehlen. Prüfe auch, ob Schritte vertauschbar sind.'},
+  'Pfannkuchen: eine Sequenz': {kind:'pancakes',caption:'Pfannkuchen zubereiten: Erst den Teig vorbereiten, dann in der erhitzten Pfanne ausbacken.'},
+  'Händewaschen: klare Befehle': {kind:'handwash',caption:'Beschreibe die dargestellten Schritte mit klaren Befehlen. Prüfe auch, ob Schritte vertauschbar sind.'},
   'Vom Algorithmus zum Programm': {kind:'program',caption:'Ein Programm formuliert einen Algorithmus in einer Programmiersprache. EVA beschreibt Eingabe, Verarbeitung und Ausgabe.'},
   'Du kannst Algorithmen erkennen!': {kind:'milestones',caption:'Du hast Definition, Eigenschaften und Reihenfolge kennengelernt.'}
  },
  'algo-display-learn': {
   'Warum Algorithmen darstellen?': {kind:'overview',caption:'Ein Ablaufplan macht die Verbindung zwischen Anweisungen sichtbar.'},
-  'Ein einfacher Ablaufplan': {kind:'flowSequence',caption:'Das vollständige Beispiel aus dem Übungsheft hat sechs Aktionen. Start und Ende zählen nicht als Aktionen.'},
+  'Ein einfacher Ablaufplan': {kind:'flowSequence',caption:'Das vollständige Beispiel hat sechs Aktionen. Start und Ende zählen nicht als Aktionen.'},
   'Das Oval': {kind:'terminals',caption:'Start und Ende stehen jeweils in einem Oval.'},
   'Das Rechteck': {kind:'action',caption:'Ein Rechteck enthält eine ausführbare Aktion.'},
   'Die Pfeile': {kind:'arrows',caption:'Folge den Pfeilspitzen vom Start über die Aktionen zum Ende.'},
@@ -38,7 +38,7 @@ const lessonFigures = {
   'Darstellungen sicher verstehen': {kind:'skills',caption:'Ablaufpläne, Entscheidungen, Wiederholungen sowie Suchen und Sortieren gehören zusammen.'}
  },
  'algo-summary': {
-  'Das Wichtigste zu Algorithmen': {kind:'principles',caption:'Die drei Bedingungen aus dem Buch: eindeutig, ausführbar und endlich. Zur Eindeutigkeit gehört auch die richtige Reihenfolge.'},
+  'Das Wichtigste zu Algorithmen': {kind:'principles',caption:'Die drei Bedingungen: eindeutig, ausführbar und endlich. Zur Eindeutigkeit gehört auch die richtige Reihenfolge.'},
   'Symbole und Pfeile': {kind:'symbolSummary',caption:'Die vier Bausteine eines Flussdiagramms auf einen Blick.'},
   'Drei Ablaufarten': {kind:'flowTypes',caption:'Sequenz führt weiter, Verzweigung wählt einen Weg, Schleife führt zurück.'},
   'Suchen und Sortieren': {kind:'sortSummary',caption:'Suchen findet eine Karte. Sortieren bringt Karten in eine Reihenfolge.'},

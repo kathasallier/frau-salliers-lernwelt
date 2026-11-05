@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.37
+# Frau Salliers Lernwelt – Version 0.39
 
 Interaktive Lernwebseite für die Klassen 5–10. Vorhandene Inhalte: Informatik,
 Klasse 5 (Hardware und Software), Klasse 6 (Binärsystem) sowie Klasse 6
@@ -29,11 +29,12 @@ dar. Codes und Lösungen sind Bestandteil der ausgelieferten Browserdateien.
 - `assets/content.js`: bestehende Lernseiten, Fragen, eingebettete Bilder,
   Merkteile und der vollständige Modulkatalog `tasks`.
 - `assets/app.js`: Navigation, Darstellung, Auswertung und Ablaufsteuerung.
-- `assets/book-workbook.js`: eigener Übungsbereich zu Buchseiten 38–41, mit
-  Originalfotos, freien Anweisungen, Geschichtenreihenfolge und Druckoptionen.
-- `assets/sources/`: vier unveränderte Originalfotos der bereitgestellten Buchseiten.
-- `assets/source-workbook.js`: ergänzende Quellenübung mit den vierzehn Aufgaben
-  aus den bereitgestellten Seiten, freier Selbstkontrolle und eigener Druckfunktion.
+- `assets/algorithm-activities.js`: gemischte Übungen 1–3, Vorbereitung und
+  20-Punkte-Test mit gemeinsamer Darstellung, Auswertung und Druckfunktion.
+- `assets/book-workbook.js` und `assets/source-workbook.js`: frühere eigenständige
+  Übungsbereiche; seit 0.39 nicht mehr geladen. Die Inhalte sind integriert.
+- `assets/practice-maps.js`: integrierter Übungsplan und Traktor-Labyrinth.
+- `assets/sources/`: archivierte Originalfotos; keine Laufzeitabhängigkeit.
 - `assets/illustrations.js`: explizite Zuordnung und SVG-Darstellung der 35
   Algorithmusabbildungen mit Bildunterschriften und zugänglichen Beschreibungen.
 - `assets/styles.css`: bestehende Gestaltung einschließlich Druck- und Mobilansicht.
@@ -85,7 +86,7 @@ CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 node --check assets/content.js
 node --check assets/illustrations.js
 node --check assets/source-workbook.js
-node --check assets/book-workbook.js
+node --check assets/algorithm-activities.js
 node --check assets/app.js
 ```
 
@@ -94,7 +95,7 @@ ist eine optionale Einstellung für isolierte Container; sie ist nicht für den
 normalen lokalen Browserbetrieb erforderlich. Die Tests starten und beenden ihren
 eigenen Server und Browser und verändern keine Lerninhalte.
 
-Die dreizehn Testfälle prüfen alle 15 Module: Katalog und Rücknavigation, leere
+Die fünfzehn Testfälle prüfen alle 13 Module: Katalog und Rücknavigation, leere
 Klassen/Fächer, sämtliche Lernseiten mit Wissenschecks und passendem Übungsübergang,
 alle vier normalen Übungen mit je fünf Seiten und vollständiger Auswertung,
 die fünf Hardwarestufen einschließlich Tastaturzuordnung, Neustart und
@@ -113,72 +114,78 @@ die 35 neuen Abbildungen. Das physische Drucken bzw. der native PDF-Druckdialog
 wurde nicht automatisiert. Freie Hardwareerklärungen bleiben wie bisher Selbstkontrollaufgaben.
 
 
-## Abbildungen und Unterrichtsunterlagen
+## Eigenständig lernen und offline ansehen
 
-Jede illustrierte Algorithmus-Lernseite erhält in `lessonFigures` einen eigenen
-Eintrag anhand von Modul-ID und Seitentitel. Keine Stichwortsuche ersetzt eine
-Abbildung pauschal durch ein Standarddiagramm. Änderungen an Seitentiteln müssen
-in dieser Zuordnung nachvollzogen werden. Wissenschecks erhalten keine
-zusätzlichen Abbildungen, die Antworten vorwegnehmen. Wiederverwendete
-Zeichenbausteine erzeugen jeweils eine seitenbezogene Grafik mit eigener
-Beschreibung und eindeutigen SVG-IDs.
+Die Lernwelt erklärt alle Aufgaben und Beispiele direkt auf der Seite. Unter
+**Informatik → Klasse 6 → Algorithmen → Üben** stehen die drei integrierten
+Übungen bereit. Die vorherigen Zusatzbereiche „Wissen anwenden“ und
+„Alltagsabläufe anwenden“ sind darin aufgegangen. Ihre Methoden und Themen sind
+über die Übungen verteilt; es gibt keine zusätzlichen parallelen Einstiege.
+Hardware, Binärsystem, ihre Aufgaben und ihre Merkteile bleiben unverändert.
 
-Alle zwanzig bereitgestellten Fotos sind mit der Lernwelt abgeglichen:
-Übungsheftseiten 3–18 und Buchseiten 38–41. Das Buch nennt Eindeutigkeit,
-Ausführbarkeit und Endlichkeit als die drei Bedingungen. Die feste Reihenfolge
-gehört zur Eindeutigkeit; das Übungsheft betont sie mit „Schritt für Schritt“.
-Das Ampel-Diagramm ist nach der nachgereichten Lösungsseite korrigiert: Nach
-„Warten“ wird die Frage erneut geprüft. Nur der Ja-Weg führt zum Überqueren und
-zum Ende. Die vollständigen Zähneputzen-, Schleifen-, Such- und Sortierbeispiele
-bleiben erhalten.
+Die drei Übungen enthalten jeweils drei kurze Abschnitte mit vier Aufgaben,
+insgesamt 36 unterschiedliche Aufgaben. Gemischt werden Auswahl, Zuordnung,
+Reihenfolge, Zählen/Rechnen, Such-/Sortierzustände und eigene Texte/Ablaufpläne.
+Zwölf Übungsaufgaben sind freie Selbstkontrolle. Die Punkte zählen ausschließlich
+geschlossene Aufgaben; eigene Texte werden weder als richtig noch als falsch
+behauptet. Ihre Auswertung enthält Beispiele und konkrete Prüffragen.
 
-Unter **Informatik → Klasse 6 → Algorithmen → Üben → Mit den Unterlagen üben**
-stehen die vierzehn Quellenaufgaben und ein Glossar zur Verfügung. Einundzwanzig geschlossene Antworten
-werden automatisch geprüft. Eigene Anleitungen, präzisierte Anweisungen, Wetterbedingungen und
-Ablaufpläne bleiben ausdrücklich Selbstkontrollaufgaben. Für einen eigenen
-Ablaufplan werden vier bis acht Aktionsfelder angeboten; die Vorlage ergänzt
-Start, Ende und Pfeile. Die eigenen Texte und der Plan sind druckbar. Eingaben
-bleiben nur während der aktuellen Bearbeitung erhalten; Neustart oder Neuladen
-löscht sie. Die bisherigen 13 Module samt Übungs- und Testaufgaben bleiben
-bestehen.
+**Testen → Abschlusstest: Algorithmen mit Vorbereitung** startet zunächst eine
+Vorbereitung mit sechs eigenen Aufgaben. Sie enthält vier geschlossene und zwei
+freie Aufgaben. Der eigentliche Test benötigt weiterhin den Zugangscode und
+umfasst 20 andere geschlossene Aufgaben für 20 Punkte. Im fertigen Test werden
+alle Antworten ausgewählt, zugeordnet oder als Reihenfolge gelegt. Es gibt keine
+Aufgaben mit selbst einzutippenden Zahlen oder Texten. Bei einer Zuordnung müssen
+alle Teilantworten stimmen. Die bisherigen Notengrenzen bleiben unverändert.
+Alle 62 Aufgaben besitzen eindeutige IDs und verschiedene Aufgabenstellungen;
+beim Laden wird ein doppelt registrierter oder gleichlautender Auftrag abgelehnt.
+Die Verfahren werden an unterschiedlichen Situationen angewendet, ohne dieselben
+Fragen seitenweise erneut zu stellen.
 
-Die genaue Zuordnung der zwanzig Dateien, fachliche Anpassungen und Grenzen des
-Abgleichs stehen in [docs/unterrichtsunterlagen.md](docs/unterrichtsunterlagen.md).
+Reihenfolgeaufgaben lassen sich einzeln neu legen. Zahlenreihen akzeptieren
+Kommas, Leerzeichen oder Semikolons und optionale eckige Klammern. Eigene
+Ablaufpläne werden aus den eingegebenen Zeilen als Vorschau dargestellt.
+Für alle Übungsseiten, die Vorbereitung und den Test sind Druck-/PDF-Ausgaben
+vorhanden. Gedruckte Tests enthalten die relevanten Abbildungen und Teilfragen.
 
-Die Aufgaben 8–11 ergänzen eine eigene Wenn–dann–sonst-Anweisung, einen
-bearbeitbaren Ampel-Ablaufplan, das viermalige „Hallo!“ der Zählerschleife und
-die drei weiteren Bubble-Sort-Tausche mit Endergebnis. Bei der Sortierung ist
-klar getrennt zwischen erstem Durchgang und vollständig sortierter Folge.
-Eigene Verzweigungen und neue Antworten werden von der bestehenden
-Quellen-Druckfunktion mit ausgegeben.
+Die Algorithmus-Merkteile folgen pro Lernkapitel drei klaren Themenblöcken:
+Definition/Bedingungen, Sequenz/Befehlsform und eigene Anwendung/EVA;
+Diagrammsymbole, Verzweigungen/Schleifen und Suchen/Sortieren. Sie erscheinen
+jeweils nach den passenden Erklärungen. Die Zusammenfassung ordnet Prüffragen
+und Testvorbereitung ein. Der vollständige Sechs-Aktionen-Ablauf bleibt enthalten.
+SVG-IDs von Aufgabenabbildungen sind getrennt von den Lernabbildungen, damit
+Pfeilspitzen auch neben ausgeblendeten Lernseiten korrekt bleiben. Der
+schematische Wegplan besitzt sichtbare Tür-/Ausgangsöffnungen. Das Labyrinth
+ist befahrbar und einschließlich der Wegeliste integriert.
 
-Die Aufgaben 12–14 ergänzen vier Insertion-Sort-Zustände, den Suchweg zur 6 in
-[4, 9, 2, 7, 6, 1, 5] mit fünf Prüfungen und eine freie Fehlerkorrektur zum
-Schuhebinden. Der unveränderte Zustand beim Einsortieren der 5 wird ausdrücklich
-mit abgefragt. Das Glossar umfasst die 13 Begriffe der Unterlagen und wird mit
-ausgedruckt. Die übermittelten Beispielantworten zu Aufgaben 1–6 wurden
-abgeglichen; Tee- und Präzisierungsbeispiele stehen hinter Selbstkontrollhinweisen.
-Offene Aufgaben 2, 3, 7, 8, 9 und 14 werden nicht automatisch inhaltlich bewertet.
+Eine vollständig eigenständige HTML-Datei erzeugen:
 
+```sh
+python3 scripts/build_offline.py
+```
 
-## Mit dem Buch üben
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.39.html`. Diese eine Datei auf den eigenen
+Computer herunterladen und per Doppelklick in einem aktuellen Browser öffnen.
+Es sind keine weiteren Ordner, keine Installation und kein Server erforderlich.
+Skripte, Stile, SVG-Zeichnungen und Bilddaten sind eingebettet. Drucken und
+PDF-Ausgaben bleiben über die Schaltflächen möglich. Eingaben werden wie bisher
+nur während der aktuellen Bearbeitung gehalten und nicht dauerhaft gespeichert.
 
-Unter **Informatik → Klasse 6 → Algorithmen → Üben → Mit dem Buch üben** gibt es
-sieben ergänzende Aufgabenbereiche zu Buchseiten 38–41: Pfannkuchen und die drei
-Bedingungen, Händewaschen in Befehlsform, Fluchtweg, Irving-Geschichte,
-Supermarktanweisungen, Labyrinth und Algorithmus/Programm/EVA. Drei Zuordnungen
-und die Reihenfolge der Geschichte werden automatisch geprüft (vier Antworten).
-Alle eigenen Texte, Wege, Begründungen und Pläne bleiben zur Selbstkontrolle.
-Die bestehenden Übungsheft-Aufgaben mit 21 geprüften Antworten bleiben separat.
+Die fünfzehn Funktionstests werden sowohl gegen die Projektversion als auch
+gegen die unveränderten Bytes der exportierten Einzeldatei ausgeführt:
 
-Die vier Originalfotos sind zum Vergrößern verlinkt. Labyrinth und Fluchtplan
-werden nicht aus unvollständigen Bildausschnitten rekonstruiert. Für den eigenen
-Schulweg bzw. Fluchtweg wird der passende Plan benötigt; es wird kein tatsächlicher
-Weg automatisch als richtig bewertet.
+```sh
+CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.39.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+```
 
-Die Druckschaltfläche druckt Aufgaben, eigene Antworten und selbst erstellte
-Ablaufpläne. Mit **Originalfotos der Buchseiten mitdrucken** können die vier Fotos
-zusätzlich ausgegeben werden. Diese Option ist standardmäßig aus. Druckzustände
-werden nach dem Drucken zurückgesetzt; bearbeitete Eingaben bleiben erhalten.
-Beide Druckvarianten werden mit PDF-Erzeugung getestet. Nach Neustart oder
-Neuladen werden die Eingaben wie in den übrigen Übungen gelöscht.
+Im zweiten Lauf ist das Browsernetzwerk gesperrt. Die initiale Dokumentanfrage
+wird mit dem Inhalt der Einzeldatei beantwortet; jede weitere Ressourcenanfrage
+führt zum Fehlschlagen des Tests. Das direkte `file://`-Öffnen ist im verwalteten
+Testbrowser administrativ gesperrt und wurde dort nicht als bestanden gewertet.
+Die vollständigen Abläufe der Datei wurden ohne Netzwerk geprüft. Auf einem
+normalen lokalen Browser lässt sich die klassische HTML-Datei direkt öffnen.
+
+Die Herkunft der fachlichen Beispiele bleibt intern in
+[docs/unterrichtsunterlagen.md](docs/unterrichtsunterlagen.md) dokumentiert.
+Version 0.39 wurde nicht auf GitHub gepusht oder als Webseite veröffentlicht.

@@ -1,3 +1,36 @@
+# Umsetzung in Version 0.39
+
+Die Quellenzuordnung unten bleibt als interne fachliche Dokumentation erhalten.
+Seit 0.39 sind die Übungsheft-/Alltagsaufgaben in Übung 1–3 und die Vorbereitung
+integriert. Die drei Übungen enthalten 36 unterschiedliche Aufgaben; sechs
+weitere dienen der Vorbereitung und 20 geschlossene Aufgaben dem Test. Alle
+62 Aufträge haben eindeutige IDs und verschiedene Aufgabenstellungen.
+
+Die Anwendungsthemen der Quellen bleiben vertreten, werden aber an passenden
+Stellen mit unterschiedlichen Antwortformen bearbeitet. Eigene Texte und Pläne
+bleiben Selbstkontrolle, mit Beispiel und Prüffragen. Unterrichtsmaterialien
+werden weiterhin nicht vorausgesetzt. Die beiden ehemaligen Zusatzbereiche
+werden nicht mehr geladen. Die Angaben zu früheren eigenständigen Bereichen
+unten beschreiben die Entstehungsgeschichte, nicht die aktuelle Navigation.
+
+Die Algorithmus-Merkteile wurden auf drei Themenblöcke pro Kapitel konzentriert
+und nach die zugehörigen Erklärungen gestellt. Die sechs Aktionen im vollständigen
+Zähneputzen-Beispiel und die korrekten Rückwege bei Schleifen bleiben erhalten.
+
+# Hinweis zu Version 0.38
+
+Die Unterlagen dienen seit 0.38 ausschließlich der internen fachlichen
+Orientierung. Die Lernoberfläche enthält keine notwendigen Buch- oder
+Übungsheftbezüge mehr. Alle Aufgaben sind mit den Erklärungen und Abbildungen
+in der Lernwelt bearbeitbar. Die Quellenzuordnung unten dokumentiert den
+Entstehungsstand 0.37; sie ist keine Anforderung an Lernende.
+
+Für die unabhängige Bearbeitung ersetzen eigene schematische Übungspläne den
+ursprünglichen Fluchtplan und das Traktor-Labyrinth. Sie werden nicht als Kopie
+der Originalabbildungen ausgegeben. Die Handwaschfolge ist vollständig in der
+Lernwelt dargestellt. Originalfotos bleiben im Archiv, werden nicht mehr geladen
+und sind in der exportierten Offline-Datei nicht enthalten.
+
 # Abgleich mit den bereitgestellten Unterlagen – 0.37
 
 Grundlage sind zwanzig vom Nutzer bereitgestellte Fotos: sechzehn Seiten aus
