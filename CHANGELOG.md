@@ -1,5 +1,22 @@
 # Änderungen
 
+## 0.41 – mehr Bilder, Diagramme im Heft und vollständige Sortierschritte
+
+- Drei neue realistische Bildmotive für Teezubereitung, Schulranzen und
+  Pfannkuchen ergänzen passende Lernseiten, jeweils nur an einer Stelle.
+  Alle Bilddaten sind auch in der Offline-Datei eingebettet.
+- Die Zusammenfassung enthält keine Heftereinträge und keinen Merkteil-Druckknopf
+  mehr. Ihre Lernseiten und Wissensfragen bleiben erhalten.
+- Merkteile der Lernkapitel enthalten Zeichenaufträge für Sequenz, Verzweigung,
+  Schleife und Kartenreihen. Die Diagrammvorlagen sind auch druckbar; zusätzliche
+  Zeichenflächen ermöglichen das Zeichnen auf Papier.
+- Bubble Sort: Nach jedem Nachbarvergleich ist die gesamte Reihe anzugeben,
+  auch ohne Tausch, bis ein vollständiger Durchgang ohne Tausch vorliegt.
+  Übung d09: 16 Zwischenstände, Übung r07: 4, Test t08: 4 Auswahlfelder.
+  Der Abschlusstest bleibt vollständig automatisch kontrollierbar.
+- 18 Funktionstests prüfen alle Module, Übungen, Tests, Merkteile und Druck/PDF,
+  zusätzlich die unveränderte Offline-Datei bei gesperrtem Netzwerk.
+
 ## 0.40 – Bildaufgabe Händewaschen und Zahnbürste
 
 - Fünf echte Bildschritte A–E ersetzen die beschrifteten Textkästen beim

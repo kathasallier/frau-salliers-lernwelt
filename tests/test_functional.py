@@ -150,15 +150,18 @@ class LearningWorldTests(unittest.TestCase):
                 self.open(task_id)
                 slides = self.page.evaluate('current.slides')
                 practice_id = self.page.evaluate('current.practiceId')
-                self.page.evaluate('window.print=()=>{}')
-                self.page.locator('#printNotebook').click()
-                self.page.emulate_media(media='print')
-                self.assertEqual(self.page.locator('#notebookPrint .print-task').count(), 3)
-                self.assertTrue(self.page.locator('#notebookPrint').is_visible())
-                self.assertFalse(self.page.locator('main').is_visible())
-                self.assert_pdf(self.page)
-                self.page.emulate_media(media='screen')
-                self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
+                if task_id == 'algo-summary':
+                    self.assertEqual(self.page.locator('#printNotebook').count(), 0)
+                else:
+                    self.page.evaluate('window.print=()=>{}')
+                    self.page.locator('#printNotebook').click()
+                    self.page.emulate_media(media='print')
+                    self.assertEqual(self.page.locator('#notebookPrint .print-task').count(), 3)
+                    self.assertTrue(self.page.locator('#notebookPrint').is_visible())
+                    self.assertFalse(self.page.locator('main').is_visible())
+                    self.assert_pdf(self.page)
+                    self.page.emulate_media(media='screen')
+                    self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
                 self.assertTrue(self.page.locator('#lessonPrev').is_disabled())
                 for i, slide in enumerate(slides):
                     self.assertEqual(self.page.locator('#lessonContent h1').inner_text(), slide['title'])
@@ -310,7 +313,7 @@ class LearningWorldTests(unittest.TestCase):
                 for width in [1100, 390]:
                     self.page.set_viewport_size({'width': width, 'height': 900})
                     if slide.get('visual'):
-                        figure = self.page.locator('.lesson-figure svg')
+                        figure = self.page.locator('.illustration .lesson-figure svg')
                         self.assertEqual(figure.count(), 1, slide['title'])
                         self.assertEqual(figure.locator('title').text_content(), slide['title'])
                         self.assertTrue(figure.locator('desc').text_content())
@@ -531,7 +534,6 @@ class LearningWorldTests(unittest.TestCase):
         expected={
             'algo-general-learn':['Endlichkeit: ein erreichbares Ende','Die Sequenz','Vom Algorithmus zum Programm'],
             'algo-display-learn':['Flussdiagramme zeichnen','Zählschleife und Bedingungsschleife','Insertion Sort'],
-            'algo-summary':['Das Wichtigste zu Algorithmen','Drei Ablaufarten','Bereit für den Test?']
         }
         for task_id,titles in expected.items():
             self.open(task_id)
@@ -548,6 +550,38 @@ class LearningWorldTests(unittest.TestCase):
             self.assertEqual(self.page.locator('#notebookPrint .print-task').count(),3)
             self.assert_pdf(self.page)
             self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
+
+    def test_summary_without_notes_and_notebook_drawing_tasks(self):
+        self.open('algo-summary')
+        for i in range(self.page.evaluate('current.slides.length')):
+            self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',i)
+            self.assertEqual(self.page.locator('.notebook-card, #printNotebook').count(),0)
+        self.open('algo-display-learn')
+        self.page.evaluate('lessonPage=12;renderLesson()')
+        self.assertIn('Zeichne ins Heft',self.page.locator('.notebook-card').inner_text())
+        self.assertEqual(self.page.locator('.notebook-drawing svg').count(),2)
+        self.assertTrue(self.page.evaluate('''()=>{const ids=[...document.querySelectorAll('[id]')].map(e=>e.id);return ids.length===new Set(ids).size}'''))
+        self.page.evaluate('window.print=()=>{}')
+        self.page.locator('#printNotebook').click()
+        self.assertEqual(self.page.locator('#notebookPrint .notebook-drawing svg').count(),3)
+        self.assertEqual(self.page.locator('#notebookPrint .notebook-draw-space').count(),3)
+        self.assert_pdf(self.page)
+
+    def test_bubble_sort_all_comparisons_including_no_swap(self):
+        banks=self.page.evaluate('''()=>[algoPracticeDisplay.flat().find(q=>q.id==='d09'),algoPracticeReview.flat().find(q=>q.id==='r07'),algoTestQuestions.find(q=>q.id==='t08')]''')
+        self.assertEqual([len(q['parts']) for q in banks],[16,4,4])
+        self.assertEqual([p['a'] for p in banks[1]['parts']],['1,3,2','1,2,3','1,2,3','1,2,3'])
+        self.assertEqual([p['a'] for p in banks[2]['parts']],['2,4,3','2,3,4','2,3,4','2,3,4'])
+        self.assertEqual([p['a'] for p in banks[0]['parts']][-4:],['1,2,3,4,5']*4)
+        self.assertTrue(all(p.get('choices') for p in banks[2]['parts']))
+        self.assertTrue(self.page.evaluate("algoCorrect(algoPracticeReview[1][2].parts[0],'[1; 3; 2]')"))
+        self.assertFalse(self.page.evaluate("algoCorrect(algoPracticeReview[1][2].parts[0],'1,2,3')"))
+        self.open('algo-general-learn')
+        for position in [8,13,15]:
+            self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',position)
+            photo=self.page.locator('.learning-photo')
+            self.assertEqual(photo.count(),1)
+            self.assertTrue(photo.evaluate('(i)=>i.complete&&i.naturalWidth>500'))
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})

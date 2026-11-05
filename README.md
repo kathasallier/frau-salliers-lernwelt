@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.40
+# Frau Salliers Lernwelt – Version 0.41
 
 Interaktive Lernwebseite für die Klassen 5–10. Vorhandene Inhalte: Informatik,
 Klasse 5 (Hardware und Software), Klasse 6 (Binärsystem) sowie Klasse 6
@@ -154,7 +154,7 @@ Die Algorithmus-Merkteile folgen pro Lernkapitel drei klaren Themenblöcken:
 Definition/Bedingungen, Sequenz/Befehlsform und eigene Anwendung/EVA;
 Diagrammsymbole, Verzweigungen/Schleifen und Suchen/Sortieren. Sie erscheinen
 jeweils nach den passenden Erklärungen. Die Zusammenfassung ordnet Prüffragen
-und Testvorbereitung ein. Der vollständige Sechs-Aktionen-Ablauf bleibt enthalten.
+und Testvorbereitung ein und enthält keine zusätzlichen Merkteile. Der vollständige Sechs-Aktionen-Ablauf bleibt enthalten.
 SVG-IDs von Aufgabenabbildungen sind getrennt von den Lernabbildungen, damit
 Pfeilspitzen auch neben ausgeblendeten Lernseiten korrekt bleiben. Der
 schematische Wegplan besitzt sichtbare Tür-/Ausgangsöffnungen. Das Labyrinth
@@ -166,19 +166,19 @@ Eine vollständig eigenständige HTML-Datei erzeugen:
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.40.html`. Diese eine Datei auf den eigenen
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.41.html`. Diese eine Datei auf den eigenen
 Computer herunterladen und per Doppelklick in einem aktuellen Browser öffnen.
 Es sind keine weiteren Ordner, keine Installation und kein Server erforderlich.
 Skripte, Stile, SVG-Zeichnungen und Bilddaten sind eingebettet. Drucken und
 PDF-Ausgaben bleiben über die Schaltflächen möglich. Eingaben werden wie bisher
 nur während der aktuellen Bearbeitung gehalten und nicht dauerhaft gespeichert.
 
-Die sechzehn Funktionstests werden sowohl gegen die Projektversion als auch
+Die achtzehn Funktionstests werden sowohl gegen die Projektversion als auch
 gegen die unveränderten Bytes der exportierten Einzeldatei ausgeführt:
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.40.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.41.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Im zweiten Lauf ist das Browsernetzwerk gesperrt. Die initiale Dokumentanfrage
@@ -199,3 +199,10 @@ Beispiel zur Selbstkontrolle verglichen. Der Abschlusstest bleibt vollständig
 automatisch kontrollierbar. Die Zahnbürsten-Abbildung zeigt einen normalen
 Bürstenkopf mit Borsten. Beide neuen Bildvorlagen wurden eigens erzeugt; die
 Datei `assets/learning-images.js` enthält die unveränderten PNG-Bilddaten.
+
+Seit 0.41 ergänzen drei unterschiedliche realistische Bildmotive die Lernseiten
+(Tee, Schulranzen, Pfannkuchen). Diagramme im Merkteil dienen als Vorlagen zum
+Zeichnen ins Heft; die Druckausgabe enthält Zeichenfläche. Bubble-Sort-Aufgaben
+fragen nach jedem Nachbarvergleich die gesamte Reihe ab, einschließlich
+unveränderter Reihen und des abschließenden Durchgangs ohne Tausch. Übungsreihen
+werden eingegeben und automatisch geprüft; im Test bleiben es Auswahlfelder.
