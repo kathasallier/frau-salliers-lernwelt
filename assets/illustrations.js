@@ -61,13 +61,13 @@ function figureOval(x,y,w,label){
  return `<ellipse cx="${x+w/2}" cy="${y+25}" rx="${w/2}" ry="25" fill="#fff0cf" stroke="#8b6a31" stroke-width="2"/>`+figureText(x+w/2,y+32,label);
 }
 function figureIcon(name,x,y,scale=1){
+ if(name==='brush')return `<g transform="translate(${x} ${y}) scale(${scale})"><image data-learning-image="toothbrush" href="${LEARNING_IMAGES.toothbrush.src}" x="-45" y="-45" width="90" height="90" preserveAspectRatio="xMidYMid meet"/></g>`;
  const shapes={
   cup:'<path d="M-24-15H18V13Q18 29-3 29T-24 13Z"/><path d="M18-10H26Q42-10 37 5Q34 13 18 13M-30 35H32M-13-29V-39M1-29V-42M14-29V-37"/>',
   kettle:'<path d="M-24 22Q-30-10-15-23H15Q29-10 24 22ZM-15-23V-31H15V-23M24-8H38V9H26M-24-7L-39-15L-29 9M-30 29H30"/>',
   switch:'<rect x="-30" y="-36" width="60" height="72" rx="12"/><path d="M0-24V1M-13-11A23 23 0 1 0 13-11"/>',
   recipe:'<rect x="-29" y="-36" width="58" height="72" rx="7"/><path d="M-16-18H16M-16-2H16M-16 14H7"/>',
   blocks:'<path d="M-35 0H0V35H-35ZM0 0H35V35H0ZM-17-35H17V0H-17Z"/>',
-  brush:'<path d="M-7 35V-20Q-7-28 3-28H23V-12H7V35ZM7-27V-39M15-27V-39M23-27V-39"/>',
   sock:'<path d="M-18-35H17V7L-9 29Q-35 43-42 23Q-44 16-31 7L-18-2ZM-18-23H17"/>',
   shoe:'<path d="M-35-8L-13 0L-1-16L12 8L33 17Q44 24 36 33H-35ZM-35 22H38M-6-1L9 4M0 8L15 12"/>',
   pencil:'<path d="M-31 23L16-30L31-16L-15 37L-35 41ZM12-25L26-12M-31 23L-15 37"/>',
@@ -136,9 +136,12 @@ function renderFigure(taskId,slide){
    const steps=[['2 Eier aufschlagen','in die Schüssel geben'],['200 ml Milch','Prise Salz und Zucker'],['200 g Mehl und','60 ml Mineralwasser'],['Alles zu einem','Teig vermengen'],['Öl erhitzen, Teig','zugeben und verteilen'],['Nach 1–2 Min. wenden','beidseitig ausbacken']];
    body=steps.map((lines,i)=>{const x=10+(i%2)*260,y=10+Math.floor(i/2)*170;return figurePanel(x,y,240,140,lines,i<4?'#fff1d6':'#eaf5f1',17)+figureText(x+20,y+25,i+1,18,'start')}).join('');break;
   }
-  case 'handwash':
-   height=460;
-   body=[['Seife auf die','Hand geben'],['Wasser','hinzunehmen'],['Hände gründlich','einreiben'],['Seife','abspülen'],['Hände','abtrocknen']].map((lines,i)=>{const y=10+i*90;return figurePanel(125,y,360,65,lines,'#eaf5f1',19)+figureText(65,y+40,String.fromCharCode(65+i),22)+(i<4?arrow(`M305 ${y+65}V${y+87}`):'')}).join('');break;
+  case 'handwash': {
+   const picture=LEARNING_IMAGES.handwash;
+   height=450*picture.height/picture.width;
+   body=`<image data-learning-image="handwash" href="${picture.src}" x="65" y="0" width="450" height="${height}" preserveAspectRatio="xMidYMid meet"/>`+Array.from({length:5},(_,i)=>figureText(30,height*(i+.5)/5+7,String.fromCharCode(65+i),22)).join('');
+   break;
+  }
   case 'program':
    height=400;
    body=figurePanel(90,10,340,65,'Algorithmus')+arrow('M260 75V107')+figurePanel(90,112,340,65,'Programmiersprache')+arrow('M260 177V209')+figurePanel(90,214,340,65,'Programm')+figureText(260,335,'Eingabe → Verarbeitung → Ausgabe',21);break;

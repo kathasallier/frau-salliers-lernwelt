@@ -1,5 +1,19 @@
 # Änderungen
 
+## 0.40 – Bildaufgabe Händewaschen und Zahnbürste
+
+- Fünf echte Bildschritte A–E ersetzen die beschrifteten Textkästen beim
+  Händewaschen. Schüler schreiben im Übungsteil ihre eigenen Anweisungen;
+  die Beispielantwort erscheint weiterhin erst bei der Selbstkontrolle.
+- Lernseite und Aufgabenstellung geben die Bildbeschreibungen nicht mehr vor.
+- Eine realistische Zahnbürste mit erkennbarem Bürstenkopf ersetzt das
+  bisherige abstrakte Symbol in den vorhandenen Abbildungen.
+- Beide Bildvorlagen sind eingebettet und auch offline verfügbar.
+- 16 Funktionstests prüfen Navigation, sämtliche Übungen und Tests sowie
+  Druck-/PDF-Ausgaben; zusätzlich derselbe Lauf mit vollständig gesperrtem
+  Netzwerk in der Einzeldatei. Der neue Bildtest prüft eigene Texte, fehlende
+  Lösungsvorgaben und das Dekodieren der eingebetteten Bilder.
+
 ## 0.39 – abwechslungsreiche integrierte Übungen und Testvorbereitung
 
 - Die bisherigen monotonen Algorithmus-Fragefolgen ersetzt: Übung 1–3 enthalten

@@ -166,3 +166,6 @@ header .wrap{padding-top:7px!important;padding-bottom:7px!important;min-height:4
  .algo-figure{break-inside:avoid}
  .algo-figure svg{max-height:180mm}
 }
+
+/* Fünf Bildschritte ohne versteckte Beschreibungen, auch mobil lesbar. */
+.lesson-figure[data-figure-kind="handwash"] .lesson-diagram{max-height:none}

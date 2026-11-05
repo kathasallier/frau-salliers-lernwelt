@@ -347,6 +347,51 @@ class LearningWorldTests(unittest.TestCase):
                     self.page.locator('#lessonNext').click()
         self.assertEqual(total, 35)
 
+    def test_handwashing_picture_writing_and_real_toothbrush(self):
+        def decoded_picture(selector):
+            image = self.page.locator(selector)
+            self.assertTrue(image.is_visible())
+            size = image.evaluate("""async el=>{const img=new Image();
+                img.src=el.getAttribute('href');await img.decode();
+                return [img.naturalWidth,img.naturalHeight]}""")
+            self.assertGreater(min(size), 500)
+
+        self.open('algo-general-practice')
+        self.answer_questions(self.page.evaluate('current.pages[0]'))
+        self.page.locator('#finish').click()
+        self.page.locator('#nextLevel').click()
+        task = self.page.locator('[data-question-id="g06"]')
+        decoded_picture('[data-question-id="g06"] image[data-learning-image="handwash"]')
+        self.assertEqual(task.locator('svg text').all_text_contents(), list('ABCDE'))
+        self.assertEqual(task.locator('textarea').input_value(), '')
+        self.assertNotIn('Gib Seife', task.inner_text())
+        self.answer_questions(self.page.evaluate('current.pages[1]'))
+        own_text = 'A: Gib Seife auf die Hand.\nB: Füge Wasser hinzu.\nC: Reibe die Hände.\nD: Spüle sie ab.\nE: Trockne sie.\nErst abspülen, dann trocknen.'
+        task.locator('textarea').fill(own_text)
+        self.page.set_viewport_size({'width':390,'height':844})
+        self.assertLessEqual(task.locator('svg').bounding_box()['width'], 390)
+        self.page.evaluate('window.print=()=>{}')
+        self.page.locator('#printAlgoWork').click()
+        self.page.emulate_media(media='print')
+        decoded_picture('[data-question-id="g06"] image[data-learning-image="handwash"]')
+        self.assertEqual(task.locator('[data-algo-print-for="q1"]').inner_text(), own_text)
+        self.assert_pdf(self.page)
+        self.page.emulate_media(media='screen')
+        self.page.locator('#finish').click()
+        self.assertIn(own_text, self.page.locator('#resultBody').inner_text())
+        self.assertIn('Selbstkontrolle – keine automatische Inhaltsbewertung', self.page.locator('#resultBody').inner_text())
+        self.open('algo-general-learn')
+        decoded_picture('#lesson image[data-learning-image="toothbrush"]')
+        self.page.evaluate('lessonPage=16;renderLesson()')
+        decoded_picture('#lesson image[data-learning-image="handwash"]')
+        self.assertNotIn('Beginne zum Beispiel', self.page.locator('#lesson').inner_text())
+        self.open('algo-display-learn')
+        self.page.evaluate('lessonPage=3;renderLesson()')
+        decoded_picture('#lesson image[data-learning-image="toothbrush"]')
+        self.page.emulate_media(media='print')
+        decoded_picture('#lesson image[data-learning-image="toothbrush"]')
+        self.assert_pdf(self.page)
+
     def test_source_teeth_diagram_and_printed_notes(self):
         self.open('algo-display-learn')
         self.page.locator('#lessonNext').click()

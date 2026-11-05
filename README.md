@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.39
+# Frau Salliers Lernwelt – Version 0.40
 
 Interaktive Lernwebseite für die Klassen 5–10. Vorhandene Inhalte: Informatik,
 Klasse 5 (Hardware und Software), Klasse 6 (Binärsystem) sowie Klasse 6
@@ -28,6 +28,8 @@ dar. Codes und Lösungen sind Bestandteil der ausgelieferten Browserdateien.
 - `index.html`: gemeinsame Ansichten für Auswahl, Lernen, Aufgaben und Ergebnisse.
 - `assets/content.js`: bestehende Lernseiten, Fragen, eingebettete Bilder,
   Merkteile und der vollständige Modulkatalog `tasks`.
+- `assets/learning-images.js`: eingebettete Bildfolge zum Händewaschen und
+  realistische Zahnbürste; auch in der Offline-Datei verfügbar.
 - `assets/app.js`: Navigation, Darstellung, Auswertung und Ablaufsteuerung.
 - `assets/algorithm-activities.js`: gemischte Übungen 1–3, Vorbereitung und
   20-Punkte-Test mit gemeinsamer Darstellung, Auswertung und Druckfunktion.
@@ -164,19 +166,19 @@ Eine vollständig eigenständige HTML-Datei erzeugen:
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.39.html`. Diese eine Datei auf den eigenen
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.40.html`. Diese eine Datei auf den eigenen
 Computer herunterladen und per Doppelklick in einem aktuellen Browser öffnen.
 Es sind keine weiteren Ordner, keine Installation und kein Server erforderlich.
 Skripte, Stile, SVG-Zeichnungen und Bilddaten sind eingebettet. Drucken und
 PDF-Ausgaben bleiben über die Schaltflächen möglich. Eingaben werden wie bisher
 nur während der aktuellen Bearbeitung gehalten und nicht dauerhaft gespeichert.
 
-Die fünfzehn Funktionstests werden sowohl gegen die Projektversion als auch
+Die sechzehn Funktionstests werden sowohl gegen die Projektversion als auch
 gegen die unveränderten Bytes der exportierten Einzeldatei ausgeführt:
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.39.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.40.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Im zweiten Lauf ist das Browsernetzwerk gesperrt. Die initiale Dokumentanfrage
@@ -188,4 +190,12 @@ normalen lokalen Browser lässt sich die klassische HTML-Datei direkt öffnen.
 
 Die Herkunft der fachlichen Beispiele bleibt intern in
 [docs/unterrichtsunterlagen.md](docs/unterrichtsunterlagen.md) dokumentiert.
-Version 0.39 wurde nicht auf GitHub gepusht oder als Webseite veröffentlicht.
+Veröffentlichung: GitHub Pages aus dem Branch `main`, Projektwurzel.
+Online: https://kathasallier.github.io/frau-salliers-lernwelt/
+
+Seit 0.40 zeigt die Händewasch-Aufgabe fünf Bilder A–E ohne vorgegebene
+Beschreibung. Die eigenen Anweisungen werden erst nach der Abgabe mit einem
+Beispiel zur Selbstkontrolle verglichen. Der Abschlusstest bleibt vollständig
+automatisch kontrollierbar. Die Zahnbürsten-Abbildung zeigt einen normalen
+Bürstenkopf mit Borsten. Beide neuen Bildvorlagen wurden eigens erzeugt; die
+Datei `assets/learning-images.js` enthält die unveränderten PNG-Bilddaten.
