@@ -87,12 +87,12 @@ function printTest(id){
 function start(id){
  const requested=tasks.find(t=>t.id===id);
  if(!requested){alert('Dieses Modul ist nicht verfügbar. Bitte wähle es erneut aus.');return false}
- if(requested.mode==='Test'&&requested.id!=='algo-test'){
+ if(requested.mode==='Test'){
   if(!checkTestCode(id))return;
  }
  resetActivityState();
  current=requested;
- if(current.id==='algo-test'){startAlgoPreparation();return true}
+ if(current.id==='algo-test'){algoPhase='test';renderAlgoWork();show('work');return true}
  activityModes[current.mode].start();
  return true;
 }
@@ -101,7 +101,7 @@ function illustrate(slide){
  const photos=current.id==='algo-general-learn'?{
   'Anweisungen in richtiger Reihenfolge':['tea','Tasse Tee und Wasserkocher als Beispiel für einen Alltagsablauf'],
   'Algorithmen selbst entwickeln':['schoolbag','Offener Schulranzen mit Heften, Federmappe und Trinkflasche'],
-  'Pfannkuchen: eine Sequenz':['pancakes','Pfannkuchen, Rührschüssel mit Teig und Pfanne']
+  'Ausführbarkeit: sinnvolle Schritte':['eggs','Links: Ei mit Schale in einer Schüssel. Rechts: aufgeschlagenes Ei ohne Schale in der Schüssel.']
  }:{};
  const photo=photos[slide.title];
  if(figure)return (photo?`<img class="learning-photo" src="${LEARNING_IMAGES[photo[0]].src}" alt="${escapeHTML(photo[1])}">`:'')+figure;

@@ -4,8 +4,8 @@
 let algoPhase=null;
 const algoPageTitles={
  'algo-general-practice':['Anleitungen erkennen und ordnen','Präzise formulieren','Eigene Abläufe entwickeln'],
- 'algo-display-practice':['Symbole und Diagramme','Verzweigungen und Schleifen','Suchen und Sortieren anwenden'],
- 'algo-review-practice':['Planen und Fehler finden','Wege und Zwischenstände','Transfer und Selbstkontrolle']
+ 'algo-display-practice':['Symbole und Diagramme','Verzweigungen und Schleifen','Wege anwenden'],
+ 'algo-review-practice':['Planen und Fehler finden','Wege beschreiben','Transfer und Selbstkontrolle']
 };
 function algoText(value){return String(value).normalize('NFC').trim().toLocaleLowerCase('de-DE').replace(/\s+/g,' ').replace(/[.!?]+$/,'')}
 function algoNumbers(value){const text=String(value).replace(/[\[\]]/g,'').trim();return text?text.split(/[\s,;]+/).map(Number):[]}
@@ -55,7 +55,7 @@ function renderAlgoWork(){
  const heading=algoPhase==='preparation'?'Vorbereitung auf den Abschlusstest':current.title;
  $('workHead').innerHTML=`<h1>${escapeHTML(heading)}</h1><p>Informatik · Klasse ${selectedGrade||6} · ${algoPhase==='preparation'?'Vorbereitung':current.mode}</p>`+
  (practiceState?`<div class="levelbar">${algoPageTitles[current.id].map((title,i)=>`<span class="levelpill ${i===stage?'active':i<stage?'done':''}">${i+1}. ${escapeHTML(title)}</span>`).join('')}</div><h2>Teil ${stage+1} von ${current.pages.length}: ${escapeHTML(algoPageTitles[current.id][stage])}</h2>`:'')+
- (algoPhase==='test'?'<p class="notice">20 unterschiedliche Aufgaben · 20 Punkte. Wähle Antworten, ordne zu oder lege eine Reihenfolge; es gibt keine offenen Texteingaben. Bei einer Zuordnung müssen alle Teilantworten stimmen. Lösungen und Note erscheinen nach der Abgabe.</p><label for="student">Dein Name</label><input id="student" maxlength="80" autocomplete="off">':'<p>Ordne, untersuche, rechne und formuliere selbst. Geschlossene Aufgaben werden geprüft. Eigene Texte und Pläne bleiben ausdrücklich zur Selbstkontrolle und zählen nicht zu den Punkten.</p>')+
+ (algoPhase==='test'?'<p class="notice">20 unterschiedliche Aufgaben · 20 Punkte. Wähle Antworten, ordne zu oder lege eine Reihenfolge; es gibt keine offenen Texteingaben. Bei einer Zuordnung müssen alle Teilantworten stimmen. Lösungen und Note erscheinen nach der Abgabe.</p><label for="student">Dein Name</label><input id="student" maxlength="80" autocomplete="off">':'<p>Ordne, untersuche, rechne und formuliere selbst. Geschlossene Aufgaben werden geprüft. Alle Übungen sind ohne Punkte. Wichtig: Eigene Texte und Pläne werden nicht inhaltlich automatisch bewertet. Vergleiche sie nach der Abgabe selbst mit Beispiel und Prüffragen.</p>')+
  `<div class="actions no-print"><button type="button" id="printAlgoWork" class="secondary">Aufgaben und eigene Antworten drucken / als PDF</button>${algoPhase==='preparation'?'<button type="button" id="beginAlgoTest">Zum Test · Zugangscode eingeben</button>':''}</div>`;
  $('questions').innerHTML=questions.map(algoQuestionHTML).join('');
  document.querySelectorAll('[data-order-q]').forEach(button=>button.addEventListener('click',()=>{
@@ -74,13 +74,13 @@ function renderAlgoWork(){
  $('printAlgoWork').onclick=()=>{updateAlgoPrint();window.print()};
  if($('beginAlgoTest'))$('beginAlgoTest').onclick=beginAlgoTest;
  $('finish').textContent=algoPhase==='test'?'Test abgeben und auswerten':algoPhase==='preparation'?'Vorbereitung auswerten':'Teil auswerten';
- $('reset').textContent=algoPhase==='test'?'Zur Vorbereitung zurückkehren':'Neu beginnen';
+ $('reset').textContent=algoPhase==='test'?'Test neu beginnen':'Neu beginnen';
 }
 function beginAlgoTest(){
  if(!checkTestCode('algo-test'))return;
  practiceState=null;algoPhase='test';$('nextLevel')?.remove();renderAlgoWork();show('work');
 }
-function startAlgoPreparation(){practiceState=null;algoPhase='preparation';renderAlgoWork();show('work')}
+function startAlgoPreparation(){return start('algo-review-practice')}
 function updateAlgoPrint(){
  if(current?.topic!=='Algorithmen')return;
  document.querySelectorAll('[data-algo-print-for]').forEach(el=>{el.textContent=$(el.dataset.algoPrintFor)?.value.trim()||'Noch nicht beantwortet.'});
@@ -105,11 +105,11 @@ function finishAlgoActivity(){
  if(practiceState){
   const stage=practiceState.page;practiceState.scores.push(points);practiceState.answers.push(answers);
   const complete=stage===current.pages.length-1;
-  if(complete){const maximum=current.pages.flat().filter(q=>!q.free).length,total=practiceState.scores.reduce((a,b)=>a+b,0);extra=`<h3>Gesamtergebnis</h3><div class="score">${total} / ${maximum} Punkte</div><p>Die freien Lösungen stehen separat zur Selbstkontrolle.</p>`}
+  if(complete)extra='<h3>Alle Teile bearbeitet</h3><p>Vergleiche deine eigenen Texte selbst mit den Beispielen und Prüffragen. Es werden keine Punkte vergeben.</p>';
   else next={label:'Weiter zu Teil '+(stage+2),run:()=>{practiceState.page++;renderAlgoWork();show('work')}};
  }else if(algoPhase==='preparation')next={label:'Zum Test · Zugangscode eingeben',run:beginAlgoTest};
  const isTest=algoPhase==='test';
- $('resultBody').innerHTML=`<div class="result"><h2>${isTest?'Testergebnis':algoPhase==='preparation'?'Deine Vorbereitung':'Deine Auswertung'}</h2>${isTest?`<p><strong>${escapeHTML($('student').value.trim())}</strong></p>`:''}<div class="score">${points} / ${scored.length} Punkte</div><p>${answers.filter(a=>a.selfCheck).length?`${answers.filter(a=>a.selfCheck).length} freie Aufgaben zur Selbstkontrolle, ohne automatische Bewertung.`:'Alle Aufgaben sind geschlossen bewertet.'}</p>${isTest?`<div class="score">Note ${grade(points)}</div><p>Notenschlüssel (20 Punkte): 19–20 = 1 · 15–18 = 2 · 12–14 = 3 · 8–11 = 4 · 4–7 = 5 · 0–3 = 6.</p>`:''}${extra}</div>`+algoAnswerFeedback(answers);
+ $('resultBody').innerHTML=`<div class="result"><h2>${isTest?'Testergebnis':algoPhase==='preparation'?'Deine Vorbereitung':'Deine Auswertung'}</h2>${isTest?`<p><strong>${escapeHTML($('student').value.trim())}</strong></p>`:''}${isTest?`<div class="score">${points} / ${scored.length} Punkte</div>`:'<p>Auswertung ohne Punkte. Eigene Texte musst du selbst vergleichen; sie werden nicht automatisch inhaltlich bewertet.</p>'}<p>${answers.filter(a=>a.selfCheck).length?`${answers.filter(a=>a.selfCheck).length} freie Aufgaben zur Selbstkontrolle, ohne automatische Bewertung.`:'Die geschlossenen Antworten wurden automatisch geprüft.'}</p>${isTest?`<div class="score">Note ${grade(points)}</div><p>Notenschlüssel (20 Punkte): 19–20 = 1 · 15–18 = 2 · 12–14 = 3 · 8–11 = 4 · 4–7 = 5 · 0–3 = 6.</p>`:''}${extra}</div>`+algoAnswerFeedback(answers);
  $('nextLevel')?.remove();if(next){const button=document.createElement('button');button.id='nextLevel';button.textContent=next.label;button.onclick=next.run;$('results').querySelector('.actions').prepend(button)}
  $('screenshotNotice').style.display=isTest?'block':'none';show('results');
 }

@@ -1,5 +1,23 @@
 # Änderungen
 
+## 0.42 – handschriftliche Unterrichtskorrekturen
+
+- Lernwelt 1: Bilder für Rezept/Bauanleitung und Ei mit/ohne Schale, getrennte
+  Vergleichsüberschriften und Schulweg-Sequenz für das Heft. Bisherige Seiten
+  16 und 18 entfernt. Händewasch-Bilder A/B vertauscht (Wasser vor Seife),
+  Lernaufgabe mündlich; schriftliche Übung nutzt dieselbe Bildfolge.
+- Lineare Suche und beide Sortierverfahren aus dem aktiven Unterrichtsumfang
+  einschließlich Merkteilen, Abbildungen, Übungen und Test entfernt.
+- g12 und r09 gestrichen; bisherige Übung 3 heißt Testvorbereitung.
+- Alle Algorithmus-Übungen zeigen Rückmeldungen ohne Punkte und weisen deutlich
+  auf den eigenständigen Vergleich freier Texte hin. Der Test startet nach
+  dem Zugangscode direkt; die bisher vorgeschaltete Vorbereitung entfällt.
+- Der Test bleibt bei 20 geschlossenen automatisch kontrollierten Aufgaben.
+  Sieben Fragen durch Fragen zum verbleibenden Lernstoff ersetzt.
+- Funktionstests auf den neuen Umfang angepasst: vollständige Navigation, alle
+  Übungen, Testzugang/-bewertung, freie Texte, Bilder, mobile Darstellung,
+  Merkteile und Druck/PDF; zusätzlich Einzeldatei ohne Netzwerk.
+
 ## 0.41 – mehr Bilder, Diagramme im Heft und vollständige Sortierschritte
 
 - Drei neue realistische Bildmotive für Teezubereitung, Schulranzen und

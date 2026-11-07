@@ -11,13 +11,11 @@ const lessonFigures = {
   'Ausführbarkeit: sinnvolle Schritte': {kind:'feasibility',caption:'Prüfe, ob eine Person die beschriebene Handlung tatsächlich ausführen kann.'},
   'Endlichkeit: ein erreichbares Ende': {kind:'finite',caption:'Der Ablauf erreicht nach endlich vielen Schritten ein Ende.'},
   'Anweisungen in richtiger Reihenfolge': {kind:'sequence',steps:[['Wasserkocher','füllen'],['Wasser','erhitzen'],['Teebeutel in eine','Tasse legen'],['Heißes Wasser','eingießen'],['Tee ziehen lassen']],icons:['kettle','switch','cup','kettle','cup'],caption:'Eine mögliche Anleitung zum Teekochen mit fünf klaren Schritten.'},
-  'Die Sequenz': {kind:'sequence',steps:[['Anweisung A'],['Anweisung B'],['Anweisung C']],caption:'A, B und C werden nacheinander ausgeführt. Kein Schritt wird übersprungen.'},
+  'Die Sequenz': {kind:'sequence',steps:[['Zu Hause starten'],['Dem sicheren','Gehweg folgen'],['Den markierten','Übergang nutzen'],['Zur Schule gehen']],caption:'Beispiel für eine Sequenz zum Schulweg. Zeichne deinen eigenen sicheren Weg ins Heft.'},
   'Algorithmen prüfen': {kind:'checklist',items:['Eindeutig?','Ausführbar?','Ein Ende vorhanden?','Reihenfolge richtig?'],caption:'Prüfe eine Anleitung mit diesen vier Fragen.'},
   'Fehlerdetektiv': {kind:'shoes',caption:'Die Socke kommt vor dem Schuh. Vertauschte Schritte passen nicht zum Ziel.'},
   'Algorithmen selbst entwickeln': {kind:'planning',caption:'Zerlege die Aufgabe, formuliere Schritte und überprüfe ihre Reihenfolge.'},
-  'Pfannkuchen: eine Sequenz': {kind:'pancakes',caption:'Pfannkuchen zubereiten: Erst den Teig vorbereiten, dann in der erhitzten Pfanne ausbacken.'},
   'Händewaschen: klare Befehle': {kind:'handwash',caption:'Beschreibe die dargestellten Schritte mit klaren Befehlen. Prüfe auch, ob Schritte vertauschbar sind.'},
-  'Vom Algorithmus zum Programm': {kind:'program',caption:'Ein Programm formuliert einen Algorithmus in einer Programmiersprache. EVA beschreibt Eingabe, Verarbeitung und Ausgabe.'},
   'Du kannst Algorithmen erkennen!': {kind:'milestones',caption:'Du hast Definition, Eigenschaften und Reihenfolge kennengelernt.'}
  },
  'algo-display-learn': {
@@ -32,16 +30,12 @@ const lessonFigures = {
   'Flussdiagramme zeichnen': {kind:'toolbox',caption:'Wähle das passende Symbol und verbinde die Schritte mit Pfeilen.'},
   'Schleifen: etwas wiederholen': {kind:'loop',caption:'Aufgaben fertig? Bei Nein eine Aufgabe lösen und erneut prüfen. Bei Ja spielen gehen und den Ablauf beenden.'},
   'Zählschleife und Bedingungsschleife': {kind:'loopTypes',caption:'Zehnmal Hampelmann: Die Anzahl steht fest. Wasser eingießen, solange das Glas nicht voll ist: Die Bedingung steuert die Wiederholung.'},
-  'Lineare Suche': {kind:'search',caption:'Suche die 5: Prüfe 7, 3, 9, 1 und 5. Treffer auf Position 5; die Karten 8 und 2 werden nicht mehr geprüft.'},
-  'Bubble Sort': {kind:'bubble',caption:'Erster Durchgang mit fünf Karten: Die 5 wandert nach rechts. [2, 4, 1, 3, 5] ist noch nicht vollständig sortiert.'},
-  'Insertion Sort': {kind:'insertion',caption:'Der sortierte Teil wächst: Füge nacheinander 2, 4, 1 und 3 in den bereits sortierten Teil ein.'},
-  'Darstellungen sicher verstehen': {kind:'skills',caption:'Ablaufpläne, Entscheidungen, Wiederholungen sowie Suchen und Sortieren gehören zusammen.'}
+  'Darstellungen sicher verstehen': {kind:'skills',caption:'Ablaufpläne, Entscheidungen und Wiederholungen gehören zusammen.'}
  },
  'algo-summary': {
   'Das Wichtigste zu Algorithmen': {kind:'principles',caption:'Die drei Bedingungen: eindeutig, ausführbar und endlich. Zur Eindeutigkeit gehört auch die richtige Reihenfolge.'},
   'Symbole und Pfeile': {kind:'symbolSummary',caption:'Die vier Bausteine eines Flussdiagramms auf einen Blick.'},
   'Drei Ablaufarten': {kind:'flowTypes',caption:'Sequenz führt weiter, Verzweigung wählt einen Weg, Schleife führt zurück.'},
-  'Suchen und Sortieren': {kind:'sortSummary',caption:'Suchen findet eine Karte. Sortieren bringt Karten in eine Reihenfolge.'},
   'Bereit für den Test?': {kind:'ready',caption:'Wiederhole die Begriffe und prüfe dein Wissen in den Übungen.'}
  }
 };
@@ -146,11 +140,11 @@ function renderFigure(taskId,slide){
    height=400;
    body=figurePanel(90,10,340,65,'Algorithmus')+arrow('M260 75V107')+figurePanel(90,112,340,65,'Programmiersprache')+arrow('M260 177V209')+figurePanel(90,214,340,65,'Programm')+figureText(260,335,'Eingabe → Verarbeitung → Ausgabe',21);break;
   case 'everyday':
-   body=[['recipe','Rezept'],['blocks','Bauanleitung'],['brush','Zähneputzen']].map(([icon,label],i)=>`<rect x="${15+i*170}" y="35" width="150" height="190" rx="20" fill="${['#fff1d6','#eaf5f1','#eeeafa'][i]}"/>`+figureIcon(icon,90+i*170,109)+figureText(90+i*170,194,label,17)).join('')+figureText(260,285,'Schritte → Ziel',24);
+   body=[['recipe','Rezept'],['blocks','Bauanleitung'],['brush','Zähneputzen']].map(([icon,label],i)=>`<rect x="${15+i*170}" y="35" width="150" height="190" rx="20" fill="${['#fff1d6','#eaf5f1','#eeeafa'][i]}"/>`+(i<2?`<image data-learning-image="${i?'building':'pancakes'}" href="${LEARNING_IMAGES[i?'building':'pancakes'].src}" x="${20+i*170}" y="55" width="140" height="100" preserveAspectRatio="xMidYMid meet"/>`:figureIcon(icon,90+i*170,109))+figureText(90+i*170,194,label,17)).join('')+figureText(260,285,'Schritte → Ziel',24);
    break;
   case 'comparison':
    height=300;
-   body=figurePanel(10,20,240,240,spec.left,'#fff0e8',20)+figurePanel(270,20,240,240,spec.right,'#eaf5f1',20);
+   body=figureText(130,45,spec.left[0],23)+figureText(390,45,spec.right[0],23)+figurePanel(10,65,240,200,spec.left.slice(1),'#fff0e8',20)+figurePanel(270,65,240,200,spec.right.slice(1),'#eaf5f1',20);
    break;
   case 'clarity':
    body=figureIcon('question',115,75)+figureText(115,150,['„Mach etwas','Leckeres.“'],20)+figureIcon('recipe',390,75)+figureText(390,150,['„Lege zwei Scheiben','Brot auf einen Teller.“'],18)+arrow('M222 90H280')+figureText(260,258,'Ungenau → eindeutig',23);
@@ -216,23 +210,6 @@ function renderFigure(taskId,slide){
    height=350;
    body=figureText(260,30,'Zählschleife',23)+figurePanel(60,55,400,75,['10-mal','Hampelmann machen'])+figureText(260,180,'Bedingungsschleife',23)+figurePanel(60,205,400,90,['Solange das Glas nicht voll ist:','weiter Wasser eingießen'], '#eeeafa',19);
    break;
-  case 'search':
-   height=300;
-   body=figureText(260,35,'Gesucht: 5',25)+[7,3,9,1,5,8,2].map((n,i)=>`<g data-search-card="${n}" data-search-checked="${i<5}">${figurePanel(10+i*72,85,60,80,n,i===4?'#d7eddf':i<4?'#fff1d6':'#f1f3f7',28)}${figureText(40+i*72,205,i<5?i+1:'–',19)}</g>`).join('')+figureText(260,260,'Treffer auf Position 5',23);
-   break;
-  case 'bubble':
-  case 'insertion': {
-   height=660;
-   const rows=spec.kind==='bubble'?[[5,2,4,1,3],[2,5,4,1,3],[2,4,5,1,3],[2,4,1,5,3],[2,4,1,3,5]]:[[5,2,4,1,3],[2,5,4,1,3],[2,4,5,1,3],[1,2,4,5,3],[1,2,3,4,5]];
-   body=rows.map((row,r)=>{
-    const y=35+r*125;
-    const active=spec.kind==='bubble'?(r?[r-1,r]:[]):r?[row.indexOf([0,2,4,1,3][r])]:[];
-    const cards=row.map((n,c)=>figurePanel(25+c*100,y,78,66,n,active.includes(c)?(spec.kind==='bubble'?'#dceaff':'#d7eddf'):'#f4f5f8',28)).join('');
-    const label=spec.kind==='bubble'?['Start: fünf Karten','5 > 2: tauschen','5 > 4: tauschen','5 > 1: tauschen','5 > 3: tauschen'][r]:['Start: erste Karte schon sortiert','2 vor 5 einfügen','4 zwischen 2 und 5 einfügen','1 ganz nach vorne einfügen','3 einfügen: fertig sortiert'][r];
-    return figureText(260,y-12,label,19)+`<g data-sort-row="${r}">${cards}</g>`;
-   }).join('');
-   break;
-  }
   case 'toolbox':
   case 'symbolSummary':
    height=390;
@@ -246,17 +223,13 @@ function renderFigure(taskId,slide){
    height=375;
    body=figureText(20,45,'Sequenz',21,'start')+arrow('M235 40H475')+figureText(20,150,'Verzweigung',21,'start')+`<path d="M300 110L340 145L300 180L260 145Z" fill="#eeeafa" stroke="#7565a5" stroke-width="2"/>`+arrow('M340 145H475')+arrow('M300 180V215H475')+figureText(20,310,'Schleife',21,'start')+figurePanel(260,260,160,65,'Schritt')+arrow('M420 292H485V350H235V292H258');
    break;
-  case 'sortSummary':
-   height=380;
-   body=figureIcon('search',65,70,.6)+figureText(145,45,'Lineare Suche',23,'start')+figureText(145,85,'7 → 3 → 9 gefunden',21,'start')+figureText(145,175,'Bubble Sort',23,'start')+figureText(145,215,'Nachbarn vergleichen ⇄',20,'start')+figureText(145,305,'Insertion Sort',23,'start')+figureText(145,345,'In sortierten Teil einfügen',20,'start')+figureIcon('blocks',65,205,.6)+figureIcon('pencil',65,330,.6);
-   break;
   case 'overview':
    height=310;
    body=figureIcon('recipe',85,110)+arrow('M150 110H228')+figurePanel(260,10,230,62,'Start','#fff1d6')+arrow('M375 72V108')+figurePanel(260,112,230,62,'Anweisung')+arrow('M375 174V210')+figurePanel(260,214,230,62,'Ende','#fff1d6')+figureText(85,210,['Anleitung'],20);
    break;
   case 'skills':
    height=340;
-   body=[['Ablaufplan','lesen'],['Entscheidungen','verstehen'],['Schleifen','erkennen'],['Suchen und','Sortieren']].map((label,i)=>figurePanel(20+(i%2)*260,20+Math.floor(i/2)*155,240,125,label,['#fff1d6','#eeeafa','#eaf5f1','#eaf0fa'][i])).join('');
+   body=[['Ablaufplan','lesen'],['Entscheidungen','verstehen'],['Schleifen','erkennen'],['Eigene Abläufe','zeichnen']].map((label,i)=>figurePanel(20+(i%2)*260,20+Math.floor(i/2)*155,240,125,label,['#fff1d6','#eeeafa','#eaf5f1','#eaf0fa'][i])).join('');
    break;
  }
  if(!body)return '';

@@ -75,6 +75,9 @@ class LearningWorldTests(unittest.TestCase):
 
     def open(self, task_id):
         self.catalog(task_id)
+        if task_id == 'algo-test':
+            code=self.page.evaluate('TEST_CODES["algo-test"]')
+            self.page.once('dialog',lambda d:d.accept(code))
         self.page.locator(f'[data-task="{task_id}"]').click()
 
     def answer_questions(self, questions, prefix='q'):
@@ -165,6 +168,9 @@ class LearningWorldTests(unittest.TestCase):
                 self.assertTrue(self.page.locator('#lessonPrev').is_disabled())
                 for i, slide in enumerate(slides):
                     self.assertEqual(self.page.locator('#lessonContent h1').inner_text(), slide['title'])
+                    if task_id.startswith('algo-'):
+                        import re
+                        self.assertIsNone(re.search(r'Bubble|Insertion|lineare Suche|Suchen und Sortieren',self.page.locator('#lesson').inner_text(),re.I))
                     if slide.get('visual') or slide.get('images'):
                         self.assertTrue(self.page.locator('.illustration').inner_html().strip())
                     if slide.get('images'):
@@ -196,11 +202,16 @@ class LearningWorldTests(unittest.TestCase):
                     self.assertTrue(self.page.locator('#results').is_visible())
                     self.assert_result_print()
                     graded = sum(not q.get('free') for q in questions)
-                    self.assertIn(f'{graded} / {graded} Punkte', self.page.locator('#resultBody').inner_text())
+                    if task_id.startswith('algo-'):
+                        self.assertEqual(self.page.locator('#resultBody .score').count(),0)
+                        self.assertIn('selbst vergleichen',self.page.locator('#resultBody').inner_text())
+                    else:
+                        self.assertIn(f'{graded} / {graded} Punkte', self.page.locator('#resultBody').inner_text())
                     if i < len(pages) - 1:
                         self.page.locator('#nextLevel').click()
                 maximum = sum(not q.get('free') for page in pages for q in page)
-                self.assertIn(f'{maximum} / {maximum} Punkte', self.page.locator('#resultBody').inner_text())
+                if not task_id.startswith('algo-'):
+                    self.assertIn(f'{maximum} / {maximum} Punkte', self.page.locator('#resultBody').inner_text())
                 self.assertEqual(self.page.locator('#nextLevel').count(), 0)
                 self.page.locator('#again').click()
                 self.page.locator(f'[data-task="{task_id}"]').click()
@@ -245,18 +256,15 @@ class LearningWorldTests(unittest.TestCase):
             with self.subTest(module=task_id):
                 self.catalog(task_id)
                 button = self.page.locator(f'[data-task="{task_id}"]')
-                if task_id == 'algo-test':
-                    button.click()
-                    button = self.page.locator('#beginAlgoTest')
                 self.page.once('dialog', lambda d: d.dismiss())
                 button.click()
-                self.assertTrue(self.page.locator('#work' if task_id=='algo-test' else '#home').is_visible())
+                self.assertTrue(self.page.locator('#home').is_visible())
                 def wrong_dialog(dialog):
                     dialog.accept('FALSCH') if dialog.type == 'prompt' else dialog.accept()
                 self.page.on('dialog', wrong_dialog)
                 button.click()
                 self.page.remove_listener('dialog', wrong_dialog)
-                self.assertTrue(self.page.locator('#work' if task_id=='algo-test' else '#home').is_visible())
+                self.assertTrue(self.page.locator('#home').is_visible())
                 code = self.page.evaluate('(id)=>TEST_CODES[id]', task_id)
                 self.page.once('dialog', lambda d: d.accept(code))
                 button.click()
@@ -348,7 +356,7 @@ class LearningWorldTests(unittest.TestCase):
                     self.assertEqual(figure.locator('path[d="M260 165H340"]').count(), 1)
                 if i < len(slides)-1:
                     self.page.locator('#lessonNext').click()
-        self.assertEqual(total, 35)
+        self.assertEqual(total, 29)
 
     def test_handwashing_picture_writing_and_real_toothbrush(self):
         def decoded_picture(selector):
@@ -385,7 +393,7 @@ class LearningWorldTests(unittest.TestCase):
         self.assertIn('Selbstkontrolle – keine automatische Inhaltsbewertung', self.page.locator('#resultBody').inner_text())
         self.open('algo-general-learn')
         decoded_picture('#lesson image[data-learning-image="toothbrush"]')
-        self.page.evaluate('lessonPage=16;renderLesson()')
+        self.page.evaluate('lessonPage=15;renderLesson()')
         decoded_picture('#lesson image[data-learning-image="handwash"]')
         self.assertNotIn('Beginne zum Beispiel', self.page.locator('#lesson').inner_text())
         self.open('algo-display-learn')
@@ -437,50 +445,21 @@ class LearningWorldTests(unittest.TestCase):
         })''')
         self.assertNotIn('algo-source-practice',data['ids'])
         self.assertNotIn('algo-book-practice',data['ids'])
-        self.assertEqual(sum(q.get('free',False) for bank in data['banks'] for page in bank for q in page),12)
+        self.assertEqual(sum(q.get('free',False) for bank in data['banks'] for page in bank for q in page),11)
         questions=[q for bank in data['banks'] for page in bank for q in page]+data['prep']+data['test']
-        self.assertEqual(len(questions),62)
-        self.assertEqual(len({q['id'] for q in questions}),62)
-        self.assertEqual(len({q['q'].strip().lower() for q in questions}),62)
+        self.assertEqual(len(questions),47)
+        self.assertEqual(len({q['id'] for q in questions}),47)
+        self.assertEqual(len({q['q'].strip().lower() for q in questions}),47)
         self.assertEqual([len(bank) for bank in data['banks']],[3,3,3])
         for bank in data['banks']:
             flat=[q for page in bank for q in page]
             self.assertTrue(any(q.get('free') for q in flat))
             self.assertTrue(any(q.get('order') for q in flat))
-            self.assertTrue(any(q.get('parts') for q in flat))
+            self.assertTrue(all(q.get('id') for q in flat))
         self.assertEqual(len(data['test']),20)
         self.assertFalse(any(q.get('free') for q in data['test']))
         self.assertTrue(all(q.get('choices') or q.get('order') or (q.get('parts') and all(p.get('choices') for p in q['parts'])) for q in data['test']))
         self.assertTrue(any(q.get('figure') for q in data['test']))
-
-    def test_preparation_self_control_test_gate_and_print(self):
-        self.open('algo-test')
-        self.assertEqual(self.page.evaluate('algoPhase'),'preparation')
-        questions=self.page.evaluate('algoPreparation')
-        self.answer_questions(questions)
-        self.page.evaluate('window.print=()=>{}')
-        self.page.locator('#printAlgoWork').click()
-        self.page.emulate_media(media='print')
-        self.assertTrue(self.page.locator('.algo-print-value').first.is_visible())
-        self.assert_pdf(self.page)
-        self.page.emulate_media(media='screen')
-        self.page.locator('#finish').click()
-        self.assertIn('4 / 4 Punkte',self.page.locator('#resultBody').text_content())
-        self.assertEqual(self.page.locator('.self-feedback').count(),2)
-        self.assertIn('keine automatische Inhaltsbewertung',self.page.locator('#resultBody').text_content())
-        self.assert_result_print()
-        self.page.once('dialog',lambda d:d.dismiss())
-        self.page.locator('#nextLevel').click()
-        self.assertTrue(self.page.locator('#results').is_visible())
-        self.assertEqual(self.page.evaluate('algoPhase'),'preparation')
-        code=self.page.evaluate('TEST_CODES["algo-test"]')
-        self.page.once('dialog',lambda d:d.accept(code))
-        self.page.locator('#nextLevel').click()
-        self.assertEqual(self.page.evaluate('algoPhase'),'test')
-        self.assertEqual(self.page.locator('.algo-task').count(),20)
-        self.assertEqual(self.page.locator('.algo-task textarea, .algo-task input:not([type=hidden])').count(),0)
-        self.page.locator('#reset').click()
-        self.assertEqual(self.page.evaluate('algoPhase'),'preparation')
 
     def test_order_reset_list_grading_mobile_and_free_preview(self):
         self.open('algo-general-practice')
@@ -493,7 +472,7 @@ class LearningWorldTests(unittest.TestCase):
         self.answer_questions(questions)
         self.page.locator('#q3').fill('<img src=x onerror=alert(1)>\nEine eigene Anweisung.')
         self.page.locator('#finish').click()
-        self.assertIn('3 / 3 Punkte',self.page.locator('#resultBody').text_content())
+        self.assertEqual(self.page.locator('#resultBody .score').count(),0)
         self.assertEqual(self.page.locator('#resultBody img').count(),0)
         self.assertEqual(self.page.locator('.self-feedback .bad').count(),0)
         self.open('algo-display-practice')
@@ -502,15 +481,12 @@ class LearningWorldTests(unittest.TestCase):
             self.answer_questions(questions)
             if stage==0:
                 self.assertEqual(self.page.locator('#algoPreview3 [data-flow-edge="retry"]').count(),1)
-            if stage==2:
-                self.page.locator('#q1-part0').fill('[2; 5; 4; 1; 3]')
-                self.page.locator('#q1-part1').fill('2,4,5,3,1')
             self.page.set_viewport_size({'width':390,'height':844})
             self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
             self.page.locator('#finish').click()
             if stage<2:self.page.locator('#nextLevel').click()
-        self.assertTrue(self.page.locator('#resultBody .bad').count()>0)
-        self.assertIn('2 / 3 Punkte',self.page.locator('#resultBody').text_content())
+        self.assertEqual(self.page.locator('#resultBody .score').count(),0)
+        self.assertIn('Alle Teile bearbeitet',self.page.locator('#resultBody').text_content())
 
     def test_embedded_figures_keep_unique_ids_after_lesson_navigation(self):
         self.open('algo-display-learn')
@@ -532,8 +508,8 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_notes_are_ordered_distinct_and_linked_to_lesson_pages(self):
         expected={
-            'algo-general-learn':['Endlichkeit: ein erreichbares Ende','Die Sequenz','Vom Algorithmus zum Programm'],
-            'algo-display-learn':['Flussdiagramme zeichnen','Zählschleife und Bedingungsschleife','Insertion Sort'],
+            'algo-general-learn':['Endlichkeit: ein erreichbares Ende','Die Sequenz','Algorithmen selbst entwickeln'],
+            'algo-display-learn':['Flussdiagramme zeichnen','Zählschleife und Bedingungsschleife','Darstellungen sicher verstehen'],
         }
         for task_id,titles in expected.items():
             self.open(task_id)
@@ -567,21 +543,34 @@ class LearningWorldTests(unittest.TestCase):
         self.assertEqual(self.page.locator('#notebookPrint .notebook-draw-space').count(),3)
         self.assert_pdf(self.page)
 
-    def test_bubble_sort_all_comparisons_including_no_swap(self):
-        banks=self.page.evaluate('''()=>[algoPracticeDisplay.flat().find(q=>q.id==='d09'),algoPracticeReview.flat().find(q=>q.id==='r07'),algoTestQuestions.find(q=>q.id==='t08')]''')
-        self.assertEqual([len(q['parts']) for q in banks],[16,4,4])
-        self.assertEqual([p['a'] for p in banks[1]['parts']],['1,3,2','1,2,3','1,2,3','1,2,3'])
-        self.assertEqual([p['a'] for p in banks[2]['parts']],['2,4,3','2,3,4','2,3,4','2,3,4'])
-        self.assertEqual([p['a'] for p in banks[0]['parts']][-4:],['1,2,3,4,5']*4)
-        self.assertTrue(all(p.get('choices') for p in banks[2]['parts']))
-        self.assertTrue(self.page.evaluate("algoCorrect(algoPracticeReview[1][2].parts[0],'[1; 3; 2]')"))
-        self.assertFalse(self.page.evaluate("algoCorrect(algoPracticeReview[1][2].parts[0],'1,2,3')"))
+    def test_release042_requested_scope_and_images(self):
+        import re,json
+        data=self.page.evaluate('''()=>({slides:[algoGeneralSlides,algoDisplaySlides,algoSummarySlides],banks:[algoPracticeGeneral,algoPracticeDisplay,algoPracticeReview],test:algoTestQuestions,notes:notebookEntries})''')
+        self.assertIsNone(re.search(r'Bubble|Insertion|lineare Suche|Sortier|Suchen und Sortieren',json.dumps(data,ensure_ascii=False),re.I))
+        self.assertEqual(len(data['slides'][0]),17)
+        self.assertEqual([len(p) for p in data['banks'][0]],[4,4,3])
+        self.assertNotIn('g12',[q['id'] for p in data['banks'][0] for q in p])
+        self.assertNotIn('r09',[q['id'] for p in data['banks'][2] for q in p])
         self.open('algo-general-learn')
-        for position in [8,13,15]:
-            self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',position)
-            photo=self.page.locator('.learning-photo')
-            self.assertEqual(photo.count(),1)
-            self.assertTrue(photo.evaluate('(i)=>i.complete&&i.naturalWidth>500'))
+        self.assertEqual(self.page.locator('.illustration image[data-learning-image="building"]').count(),1)
+        self.assertEqual(self.page.locator('.illustration image[data-learning-image="pancakes"]').count(),1)
+        self.page.evaluate('lessonPage=2;renderLesson()')
+        self.assertIn('Unklar',self.page.locator('.illustration svg').text_content())
+        self.assertIn('Konkrete Schritte',self.page.locator('.illustration svg').text_content())
+        self.page.evaluate('lessonPage=5;renderLesson()')
+        self.assertTrue(self.page.locator('.learning-photo').evaluate('(i)=>i.complete&&i.naturalWidth>500'))
+        self.page.evaluate('lessonPage=9;renderLesson()')
+        self.assertIn('Schulweg',self.page.locator('.notebook-card').inner_text())
+        self.page.evaluate('lessonPage=15;renderLesson()')
+        self.assertIn('mündlich',self.page.locator('#lesson').inner_text())
+        self.assertTrue(self.page.locator('image[data-learning-image="handwash"]').is_visible())
+        self.open('algo-review-practice')
+        self.assertEqual(self.page.locator('#workHead h1').inner_text(),'Testvorbereitung')
+        self.open('algo-test')
+        self.assertEqual(self.page.evaluate('algoPhase'),'test')
+        self.assertEqual(self.page.locator('#beginAlgoTest').count(),0)
+        self.assertEqual(self.page.locator('.algo-task').count(),20)
+        self.assertEqual(self.page.locator('.algo-task textarea, .algo-task input:not([type=hidden])').count(),0)
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})
