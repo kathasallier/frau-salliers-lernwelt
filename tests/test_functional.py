@@ -125,17 +125,17 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_navigation_all_modules_and_empty_grades(self):
         ids = self.page.evaluate('tasks.map(t=>t.id)')
-        self.assertEqual(len(ids), 15)
+        self.assertEqual(len(ids), 10)
         for task_id in ids:
             with self.subTest(module=task_id):
                 self.catalog(task_id)
                 self.assertTrue(self.page.locator(f'[data-task="{task_id}"]').is_visible())
-                self.assertEqual(self.page.locator('.material-group').count(), 3)
+                self.assertEqual(self.page.locator('.material-group').count(),2 if task_id.startswith('binary-') else 3)
         self.page.reload()
         self.page.locator('[data-sub="Informatik"]').click()
         self.page.locator('[data-grade="5"]').click()
-        self.assertEqual(self.page.locator('[data-topic]').count(), 1)
-        self.assertEqual(self.page.locator('[data-topic]').get_attribute('data-topic'), 'Hardware und Software')
+        self.assertEqual(self.page.locator('[data-topic]').count(), 0)
+        self.assertIn('noch keine Themen',self.page.locator('#topicTiles').inner_text())
         self.page.locator('[data-crumb="1"]').click()
         self.page.locator('[data-grade="6"]').click()
         self.assertEqual(set(self.page.locator('[data-topic]').evaluate_all('(nodes)=>nodes.map(n=>n.dataset.topic)')), {'Algorithmen', 'Binärsystem, Bits und Bytes'})
@@ -226,40 +226,18 @@ class LearningWorldTests(unittest.TestCase):
                 self.page.locator('#reset').click()
                 self.assertEqual(self.page.evaluate('practiceState.page'), 0)
 
-    def test_hardware_sorting_keyboard_all_stages_and_reset(self):
-        self.open('hardware-practice')
-        self.page.once('dialog', lambda dialog: dialog.accept())
-        self.page.locator('#finish').click()
-        self.assertTrue(self.page.locator('#work').is_visible())
-        cards = self.page.evaluate('hardwareCards')
-        for stage in range(2):
-            for card in cards:
-                group = card['kind'] if stage == 0 else ('Software' if card['kind'] == 'Software' else 'Innen' if card.get('role') == 'Innen' else 'Außen')
-                self.page.locator(f'[data-card="{card["id"]}"]').click()
-                self.page.locator(f'[data-zone="{group}"]').press('Enter')
-            self.page.locator('#finish').click()
-            self.assertIn('12 / 12 Punkte', self.page.locator('#resultBody').inner_text())
-            self.assert_result_print()
-            self.page.locator('#nextLevel').click()
-        for stage in [2, 3]:
-            questions = self.page.evaluate('hwStage===3?[...HW_PRACTICE[1],...HW_PRACTICE[2]]:HW_PRACTICE[0]')
-            self.answer_questions(questions, 'hwq')
-            self.page.locator('#finish').click()
-            self.assertIn(f'{len(questions)} / {len(questions)}', self.page.locator('#resultBody').inner_text())
-            self.assert_result_print()
-            self.page.locator('#nextLevel').click()
-        for field in self.page.locator('#questions textarea').all():
-            field.fill('Eine eigene Erklärung zur Aufgabe.')
-        self.page.locator('#finish').click()
-        self.assertIn('Geschafft!', self.page.locator('#resultBody').inner_text())
-        self.assert_result_print()
-        self.page.locator('#again').click()
-        self.page.locator('[data-task="hardware-practice"]').click()
-        self.page.locator('#reset').click()
-        self.assertEqual(self.page.evaluate('[hwStage,hwAnswers.length,Object.keys(sortAssignments).length]'), [0, 0, 0])
+    def test_temporarily_removed_topics_and_tests(self):
+        ids=self.page.evaluate('tasks.map(t=>t.id)')
+        self.assertFalse(any(id.startswith('hardware-') for id in ids))
+        self.assertNotIn('binary-test',ids);self.assertNotIn('binary-preparation',ids)
+        self.assertEqual(self.page.evaluate('HW_TEST.length'),20)
+        self.assertEqual(self.page.evaluate('BINARY_ARCHIVED_TEST.length'),20)
+        self.catalog('binary-learn')
+        self.assertEqual(self.page.locator('[data-print-test]').count(),0)
+        self.assertEqual(self.page.locator('.material-group').count(),2)
 
     def test_tests_access_name_scoring_and_print(self):
-        for task_id in ['binary-test', 'hardware-test', 'algo-test']:
+        for task_id in ['algo-test']:
             with self.subTest(module=task_id):
                 self.catalog(task_id)
                 button = self.page.locator(f'[data-task="{task_id}"]')
@@ -315,11 +293,8 @@ class LearningWorldTests(unittest.TestCase):
         self.page.locator('#finish').click()
         self.assertEqual(self.page.locator('#resultBody .score').count(),0)
         self.assertTrue(self.page.locator('#resultBody .bad').count()>0)
-        self.open('hardware-practice')
-        self.assertIsNone(self.page.evaluate('practiceState'))
-        self.assertEqual(self.page.locator('#nextLevel').count(), 0)
         self.open('algo-general-practice')
-        self.assertEqual(self.page.evaluate('[hwStage,hwAnswers.length,practiceState.page]'), [0, 0, 0])
+        self.assertEqual(self.page.evaluate('practiceState.page'),0)
 
     def test_distinct_figures_geometry_and_loop(self):
         total = 0
@@ -617,7 +592,7 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_direct_result_pdf_download_for_all_tests(self):
         import fitz,re
-        for task_id in ['binary-test','hardware-test','algo-test']:
+        for task_id in ['algo-test']:
             with self.subTest(module=task_id):
                 self.catalog(task_id)
                 code=self.page.evaluate('(id)=>TEST_CODES[id]',task_id)
@@ -643,7 +618,7 @@ class LearningWorldTests(unittest.TestCase):
                 before=self.page.evaluate('window.printCalls||0')
                 # Hidden input changes must not alter an already submitted result.
                 self.page.locator('#student').evaluate("e=>e.value='Anderer Name'")
-                if task_id=='binary-test':
+                if task_id=='algo-test':
                     self.page.evaluate("()=>{window.originalPdfBuild=buildTestResultPdf;buildTestResultPdf=async()=>{throw new Error('Testfehler')}}")
                     self.page.locator('#downloadTestPdf').click()
                     self.assertIn('erneut',self.page.locator('#pdfDownloadStatus').inner_text())
@@ -774,8 +749,8 @@ class LearningWorldTests(unittest.TestCase):
         self.assertIn('224, 237, 249',colors['body'])
 
     def test_binary_world_book_examples_lamps_and_input(self):
-        data=self.page.evaluate('''()=>({slides:binarySlides,notes:notebookEntries['binary-learn'],positions:notebookPositions['binary-learn'],practice:BINARY_PRACTICE,prep:BINARY_PREPARATION,test:BINARY_TEST})''')
-        self.assertEqual(len(data['slides']),22)
+        data=self.page.evaluate('''()=>({slides:binarySlides,notes:notebookEntries['binary-learn'],positions:notebookPositions['binary-learn'],practice:BINARY_PRACTICE,prep:BINARY_ARCHIVED_PREPARATION,test:BINARY_ARCHIVED_TEST})''')
+        self.assertEqual(len(data['slides']),19)
         self.assertEqual(len(data['notes']),3)
         self.assertEqual([len(p) for p in data['practice']],[4,4,4])
         self.assertEqual([len(p) for p in data['prep']],[4,4,4])
@@ -793,7 +768,7 @@ class LearningWorldTests(unittest.TestCase):
         self.page.evaluate('lessonPage=14;renderLesson()')
         text=self.page.locator('.illustration').inner_text()
         self.assertIn('28 : 2',text);self.assertIn('unten nach oben',text)
-        self.page.evaluate('lessonPage=20;renderLesson()')
+        self.page.evaluate('lessonPage=17;renderLesson()')
         self.assertEqual(self.page.locator('.binary-figure').get_attribute('data-binary-kind'),'counting')
         for position in data['positions']:
             self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',position)
@@ -831,6 +806,43 @@ class LearningWorldTests(unittest.TestCase):
                 self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         rows=self.page.evaluate('''()=>{const html=renderBinaryFigure({binaryKind:'division',value:28},'check-division');const d=document.createElement('div');d.innerHTML=html;return [...d.querySelectorAll('text')].map(t=>t.textContent)}''')
         self.assertEqual(rows[3:18],['28 : 2','14','0','14 : 2','7','0','7 : 2','3','1','3 : 2','1','1','1 : 2','0','1'])
+
+    def test_binary_review_corrections_and_fillable_tables(self):
+        import json,re
+        active=self.page.evaluate('''()=>({slides:binarySlides,notes:notebookEntries['binary-learn'],practice:BINARY_PRACTICE,summary:BINARY_SUMMARY})''')
+        self.assertIsNone(re.search(r'\bByte\b|\bBits?\b',json.dumps(active,ensure_ascii=False)))
+        self.assertEqual(active['slides'][0]['title'],'Das Dezimalsystem')
+        self.assertEqual(active['slides'][2]['title'],'Das Binärsystem erklären')
+        self.assertNotIn('binaryFigure',active['slides'][7])
+        self.open('binary-learn')
+        caption=self.page.locator('.illustration figcaption').inner_text()
+        self.assertIn('Dezimalsystem',caption);self.assertIn('zehnmal',caption)
+        self.page.evaluate('lessonPage=12;renderLesson()')
+        self.assertIn('0 von 7',self.page.locator('.illustration').inner_text())
+        self.assertNotIn('1010011',self.page.locator('.illustration').inner_text())
+        for n in range(7):self.page.locator('.binary-reveal-step').click()
+        self.assertIn('1010011',self.page.locator('.illustration').inner_text())
+        self.assertTrue(self.page.locator('.binary-reveal-step').is_disabled())
+        self.page.locator('#lessonNext').click();self.page.locator('#lessonPrev').click()
+        self.assertIn('7 von sieben',self.page.locator('.illustration svg desc').text_content())
+        self.page.evaluate('lessonPage=17;renderLesson()')
+        headers=self.page.locator('.illustration svg text').all_text_contents()[:5]
+        self.assertEqual(headers,['Zahl','8','4','2','1'])
+        self.assertIn('15',self.page.locator('#lessonContent').inner_text())
+        self.open('binary-practice')
+        table=self.page.locator('[data-question-id="b03"] .binary-answer-table')
+        self.assertEqual(table.locator('tbody input').count(),8)
+        self.assertTrue(all(v=='' for v in table.locator('tbody input').evaluate_all('(inputs)=>inputs.map(i=>i.value)')))
+        for _ in range(2):
+            self.answer_questions(self.page.evaluate('current.pages[practiceState.page]'))
+            self.page.locator('#finish').click();self.page.locator('#nextLevel').click()
+        self.assertEqual(self.page.locator('[data-question-id="b10"] tbody tr').count(),6)
+        self.assertEqual(self.page.locator('[data-question-id="b10"] tbody input').count(),12)
+        self.answer_questions(self.page.evaluate('current.pages[2]'))
+        self.page.locator('#finish').click()
+        self.assertIn('37 : 2 = 18 Rest 1',self.page.locator('#resultBody').inner_text())
+        self.assertIn('100101',self.page.locator('#resultBody').inner_text())
+        self.assertEqual(self.page.locator('#resultBody .bad').count(),0)
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})

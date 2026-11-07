@@ -51,6 +51,7 @@ function algoQuestionHTML(q,i){
  const figure=q.figure?`<div class="algo-figure">${namespaceAlgoFigure(algoFigure(q.figure),q.id)}</div>`:'';
  let fields='';
  if(q.order)fields=algoOrderHTML(q,i)+`<button class="secondary no-print" type="button" data-algo-order-reset="${i}">Diese Reihenfolge neu legen</button><ol class="algo-order-print">${q.order.map(v=>`<li>□ ${escapeHTML(v)}</li>`).join('')}</ol>`;
+ else if(q.matrix)fields=renderBinaryMatrix(q,id);
  else if(q.parts)fields=q.parts.map((part,j)=>`<label for="${id}-part${j}">${escapeHTML(part.label)}</label>${algoField(part,id+'-part'+j,part.label)}`).join('');
  else fields=algoField(q,id,q.q);
  return `<section class="question algo-task" data-question-id="${q.id}"><h3>Aufgabe ${i+1}${q.free?' · Selbstkontrolle':''}</h3><p><strong>${escapeHTML(q.q)}</strong></p>${figure}${q.code?`<pre class="workbook-code">${escapeHTML(q.code)}</pre>`:''}${fields}${q.preview?`<p class="small muted">Die Vorschau zeigt bis zu acht kurze Zeilen. Prüfe die Bedeutung und Reihenfolge deiner eigenen Anweisungen.</p><div id="algoPreview${i}"></div>`:''}</section>`;

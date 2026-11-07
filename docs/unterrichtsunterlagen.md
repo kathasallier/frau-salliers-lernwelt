@@ -238,3 +238,11 @@ Division 28 : 2, Stellenwerte bis 256, Lampen zu 0/1 und die Zähltafel bis 63.
 Abbildungen wurden eigenständig als SVG neu gezeichnet. Die Webseite benötigt
 die Fotos nicht und verweist die Lernenden nicht auf das Buch. Erweiterte
 Bits-/Bytes-Themen außerhalb dieser Fotos sind noch nicht ergänzt.
+
+
+## Lehrkraftkorrekturen 0.49
+
+Die neuen handschriftlichen Vorgaben begrenzen Lernwelt 1 auf das Binärsystem.
+Die Lehrbuch-Zähltafel bis 63 wird ausdrücklich mit vier Stellenwerten bis 15
+geübt. Bit/Byte folgen erst in Lernwelt 2. Testvorbereitung und Test sowie
+das Klasse-5-Thema sind vorerst aus dem aktiven Angebot entfernt.

@@ -1,7 +1,7 @@
-# Frau Salliers Lernwelt – Version 0.48
+# Frau Salliers Lernwelt – Version 0.49
 
-Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Hardware und
-Software (Klasse 5), Binärsystem und Algorithmen (Klasse 6). Weitere Bereiche
+Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Das Binärsystem sowie Algorithmen in Klasse 6.
+Das Klasse-5-Thema ist vorerst aus dem Angebot genommen. Weitere Bereiche
 zeigen einen Hinweis, solange noch keine Inhalte hinterlegt sind.
 
 Online: https://kathasallier.github.io/frau-salliers-lernwelt/
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.48.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.49.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.48.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.49.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -82,7 +82,7 @@ vorgeschaltete Übungen. Er bleibt mit 20 geschlossenen Fragen automatisch
 kontrollierbar. Sieben Testfragen wurden passend zum verbleibenden Lernstoff
 ersetzt. Hardware und Binärsystem behalten ihre bisherigen Abläufe.
 
-23 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
+24 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
 zusätzlich denselben Stand als exportierte Einzeldatei ohne Netzwerk.
 
 Seit 0.43 zeigt Lernwelt 1, Folie 6 nur das Eierbild; die zusätzliche Grafik
@@ -171,7 +171,7 @@ Umgebung wegen der Netzwerkfreigabe nicht abrufbar. Deshalb wurden keine
 exakten offiziellen Farbwerte behauptet und kein Schullogo nachgebildet oder
 übernommen. Für das Original-Logo ist eine zugängliche Originaldatei nötig.
 
-23 Browserregressionen prüfen zusätzlich Einstieg, Anleitung, erforderliche
+24 Browserregressionen prüfen zusätzlich Einstieg, Anleitung, erforderliche
 Antworten, unmittelbare Rückmeldung und Zurücknavigation in allen Lernmodulen.
 
 
@@ -211,3 +211,35 @@ sind unverändert. Funktionstests prüfen alle Themen einschließlich Navigation
 Zwischenfragen, Merkteilen, Übungen, Bewertung, Druck und Ergebnis-Downloads.
 Zusätzliche Prüfungen kontrollieren Abbildungsgrenzen, Division und
 Binäreingaben sowie die Lampenbedienung auf schmalen Bildschirmen.
+
+
+## Aktueller Umfang nach Durchsicht (0.49)
+
+Lernwelt 1 beginnt mit Dezimalsystem/Stellenwerten, erklärt dann das Binärsystem
+und erst danach die Lampendarstellung. Dezimale und binäre Abbildungen haben
+passende eigene Bildunterschriften. Die Addition verwendeter Stellenwerte wird
+explizit erklärt. Vor der Beispiel-Lampenreihe steht ein Zeichenauftrag fürs Heft.
+
+Die Zerlegung von 83 wird in sieben einzeln aufdeckbaren Schritten gezeigt,
+einschließlich der Nullstellen. Die Division von 28 nennt ausdrücklich die
+Lösung 11100₂. Die doppelte Rest-Erklärung entfällt. Die Zähltafel verwendet
+8, 4, 2 und 1 und soll im Heft bis 15 ergänzt werden. Bit-/Byte-Definitionen und
+die Byte-Reichweite sind für Lernwelt 2 zurückgestellt. Führende Nullen bleiben
+als Darstellung von Binärzahlen erklärt. Lernwelt 1 hat jetzt 19 Inhaltsseiten.
+
+Übung 1, Teil 1, Aufgabe 3 ist eine ausfüllbare Stellenwerttabelle. Teil 3 zeigt
+bei der Lampenaufgabe die Summe deutlich an. Die Divisionsaufgabe enthält eine
+ausfüllbare Tabelle für alle Quotienten und Reste sowie das Ergebnis; nach der
+Auswertung erscheint die vollständige Lösungsfolge. Tabellen sind auch druckbar.
+
+Testvorbereitung und Test des Binärthemas sowie das Klasse-5-Thema sind derzeit
+nicht registriert und nicht im Angebot. Die bisherigen Daten/Codes bleiben
+zur späteren Wiederverwendung aufbewahrt. Die Binär-Zusammenfassung führt zur
+Übung 1. Aktive Angebote: Algorithmen und Lernwelt 1 des Binärthemas in Klasse 6,
+sowie der unabhängige Startseiten-Übungstest. Die Algorithmen-Inhalte bleiben
+unverändert. Neue Inhalte für Lernwelt 2 werden erst anhand weiterer Unterlagen
+erstellt.
+
+24 Funktionstests prüfen zusätzlich die zurückgestellten Bereiche, den neuen
+Lernablauf, die Schrittfolge und ausfüllbare Tabellen. Alle aktiven Übungen,
+Zwischenfragen und Druck-/PDF-Funktionen werden auch offline geprüft.

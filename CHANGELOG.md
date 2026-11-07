@@ -1,5 +1,19 @@
 # Änderungen
 
+## 0.49 – Korrekturen an Lernwelt 1, Umfang vorerst reduziert
+
+- Dezimalsystem vor Binärsystem und Lampen; passende Bildunterschriften und
+  ausdrücklicher Additionshinweis. Zeichenauftrag vor der Beispiel-Lampenreihe.
+- Zerlegung einzeln aufdeckbar, Divisionslösung genannt, doppelte Erklärung
+  entfernt. Zähltafel mit 8/4/2/1 bis 15 fürs Heft.
+- Bit-/Byte-Inhalte für Lernwelt 2 zurückgestellt. Lernwelt 1 jetzt 19 Seiten.
+- Ausfüllbare Tabellen für Stellenwerte und vollständige Division; Lösungsfolge
+  nach der Auswertung, gut sichtbare Lampensumme und druckbare Eingaben.
+- Binär-Testvorbereitung/-Test und Klasse-5-Thema vorerst aus dem aktiven Angebot
+  genommen; Daten zur Wiederherstellung erhalten. Algorithmen unverändert.
+- 24 Funktionstests einschließlich aller aktiven Module, Tabellen, Schrittfolge,
+  Auswertung, Druck und PDF sowie Offline-Einzeldatei.
+
 ## 0.48 – Lernwelt 1 im Thema Binärsystem, Bits und Bytes
 
 - Klasse-6-Thema umbenannt, Lernwelt 1 anhand der neuen Buchfotos überarbeitet:
