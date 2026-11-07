@@ -3,7 +3,7 @@
 'use strict';
 let lessonPage=0,lessonResponses={};
 let practiceState=null;
-let current=null;const $=id=>document.getElementById(id);function show(id){document.body.classList.remove('mode-learn','mode-practice','mode-test');if(id==='lesson')document.body.classList.add('mode-learn');else if(id==='work'||id==='results')document.body.classList.add(current?.mode==='Test'?'mode-test':'mode-practice');for(const x of ['home','work','results','lesson'])$(x).classList.toggle('hidden',x!==id);window.scrollTo(0,0)}function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}let selectedSubject=null,selectedGrade=null,selectedTopic=null;
+let current=null;const $=id=>document.getElementById(id);function show(id){$('downloadTestPdf').hidden=!(id==='results'&&testResultSnapshot&&current?.mode==='Test');document.body.classList.remove('mode-learn','mode-practice','mode-test');if(id==='lesson')document.body.classList.add('mode-learn');else if(id==='work'||id==='results')document.body.classList.add(current?.mode==='Test'?'mode-test':'mode-practice');for(const x of ['home','work','results','lesson'])$(x).classList.toggle('hidden',x!==id);window.scrollTo(0,0)}function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}let selectedSubject=null,selectedGrade=null,selectedTopic=null;
 const subjectIcons={'Informatik':'💻','Mathematik':'🔢','Hauswirtschaft':'🍎'};
 function navStep(step){
  if(step==='Subject'){selectedSubject=null;selectedGrade=null;selectedTopic=null}
@@ -154,7 +154,7 @@ function finishPractice(){
  const actions=$('results').querySelector('.actions');
  let next=$('nextLevel');if(next)next.remove();
  if(!completed){next=document.createElement('button');next.id='nextLevel';next.textContent=`Weiter zu ${levels[page+1]} →`;next.addEventListener('click',()=>{practiceState.page++;renderWork();show('work')});actions.prepend(next)}
- $('screenshotNotice').style.display='none';show('results');
+ $('pdfNotice').style.display='none';show('results');
 }
 function normalize(s){return String(s).trim().replace(/\s+/g,'').replace(/^0+(?=\d)/,'')}function grade(points){return points>=19?'1':points>=15?'2':points>=12?'3':points>=8?'4':points>=4?'5':'6'}function finish(){
  if(current)activityEngines[current.engine].finish();
@@ -166,7 +166,7 @@ function finishQuestions(){
  const answers=evaluate(current.questions);if(answers.some(a=>!a.given)&&!confirm('Einige Antworten fehlen. Trotzdem abgeben?'))return;
  const score=answers.filter(a=>a.correct).length,percent=Math.round(100*score/answers.length),today=new Date().toLocaleDateString('de-DE');
  $('resultBody').innerHTML=`<div class="result"><p><strong>${escapeHTML(name)}</strong> · ${escapeHTML(current.subject)} · Klasse ${selectedGrade||current.grades[0]}</p><p>${escapeHTML(current.title)} · ${today}</p><div class="score">${score} / ${answers.length} Punkte</div><p>${percent}% erreicht</p><div class="score">Note ${grade(score)}</div><p class="small">Notenschlüssel (20 Punkte): Note 1 ab 19, Note 2 ab 15, Note 3 ab 12, Note 4 ab 8, Note 5 ab 4 Punkten; sonst Note 6.</p></div>`+renderAnswers(answers);
- $('screenshotNotice').style.display='block';show('results')}
+ captureTestResult(name,answers,score);$('pdfNotice').style.display='block';show('results')}
 
 let sortStage=0,sortAssignments={},selectedCard=null,sortOrder=[];function shuffleCards(){sortOrder=[...hardwareCards].sort(()=>Math.random()-.5)}
 function sortingGroup(card){return sortStage===0?card.kind:(card.kind==='Software'?'Software':card.role==='Innen'?'Innen':'Außen')}
@@ -187,7 +187,7 @@ function sortCardHTML(c){return `<button type="button" class="sort-card" draggab
 function assignSort(id,group){if(!hardwareCards.some(c=>c.id===id))return;sortAssignments[id]=group;selectedCard=null;renderSorting()}
 function finishSorting(){if(Object.keys(sortAssignments).length<hardwareCards.length){alert('Ordne bitte zuerst alle Bildkarten zu.');return}const correct=hardwareCards.filter(c=>sortAssignments[c.id]===sortingGroup(c));const score=correct.length;const full=score===hardwareCards.length;
  $('resultBody').innerHTML=`<div class="result"><p>Informatik · Klasse 5 · Übung ohne Namensangabe</p><h2>Stufe ${sortStage+1} von 5 · ${levels[sortStage]}</h2><h3>${sortStage===0?'Hardware oder Software':'Geräte und Programme zuordnen'}</h3><div class="score">${score} / 12 Punkte</div><p>${full?'Klasse! Alle Karten sind richtig zugeordnet.':'Schau dir die Korrekturen an und versuche es erneut.'}</p></div><h3>Deine Zuordnungen</h3>${hardwareCards.map(c=>`<p>${c.icon} <strong>${escapeHTML(c.name)}</strong>: ${escapeHTML(sortAssignments[c.id])} – <span class="${sortAssignments[c.id]===sortingGroup(c)?'good':'bad'}">${sortAssignments[c.id]===sortingGroup(c)?'Richtig':'Richtig wäre: '+sortingGroup(c)}</span></p>`).join('')}`;
- $('screenshotNotice').style.display='none';const old=$('nextLevel');if(old)old.remove();if(sortStage===0||sortStage===1){const b=document.createElement('button');b.id='nextLevel';b.textContent=sortStage===0?'Weiter zu innen und außen →':'Weiter zu Stufe 3: Fortgeschritten →';b.addEventListener('click',()=>{if(sortStage===0){sortStage=1;hwStage=1;sortAssignments={};shuffleCards();renderSorting();show('work')}else{hwStage=2;hwShowStage()}});$('results').querySelector('.actions').prepend(b)}show('results')}
+ $('pdfNotice').style.display='none';const old=$('nextLevel');if(old)old.remove();if(sortStage===0||sortStage===1){const b=document.createElement('button');b.id='nextLevel';b.textContent=sortStage===0?'Weiter zu innen und außen →':'Weiter zu Stufe 3: Fortgeschritten →';b.addEventListener('click',()=>{if(sortStage===0){sortStage=1;hwStage=1;sortAssignments={};shuffleCards();renderSorting();show('work')}else{hwStage=2;hwShowStage()}});$('results').querySelector('.actions').prepend(b)}show('results')}
 
 
 let hwStage=0,hwAnswers=[],hwName='';
@@ -210,7 +210,7 @@ function hwFinishPractice(){
  const answers=hwCollect(hwStage===3?[...HW_PRACTICE[1],...HW_PRACTICE[2]]:HW_PRACTICE[0]);if(answers.some(x=>!x.given)&&!confirm('Einige Antworten fehlen. Trotzdem auswerten?'))return;
  hwAnswers.push(answers);$('resultBody').innerHTML=`<h2>Stufe ${hwStage+1} von 5 · ${levels[hwStage]}</h2><h3>Deine Auswertung</h3><div class="score">${answers.filter(x=>x.correct).length} / ${answers.length}</div>`+answers.map((a,i)=>`<div class="question"><strong>${i+1}. ${escapeHTML(a.q)}</strong><p>${escapeHTML(a.given||'–')} · <span class="${a.correct?'good':'bad'}">${a.correct?'Richtig':'Noch nicht richtig'}</span></p>${a.correct?'':`<p>Richtige Antwort: <strong>${escapeHTML(a.a)}</strong></p>`}<p class="muted">${escapeHTML(a.why)}</p></div>`).join('');hwResult(true)
 }
-function hwResult(next){$('screenshotNotice').style.display='none';$('results').querySelector('#nextLevel')?.remove();if(next){const b=document.createElement('button');b.id='nextLevel';b.textContent='Weiter zu '+levels[hwStage+1]+' →';b.onclick=()=>{hwStage++;hwShowStage()};$('results').querySelector('.actions').prepend(b)}show('results')}
+function hwResult(next){$('pdfNotice').style.display='none';$('results').querySelector('#nextLevel')?.remove();if(next){const b=document.createElement('button');b.id='nextLevel';b.textContent='Weiter zu '+levels[hwStage+1]+' →';b.onclick=()=>{hwStage++;hwShowStage()};$('results').querySelector('.actions').prepend(b)}show('results')}
 function hwStartTest(){practiceState=null;hwStage=-1;hwName='';hwRenderTest();show('work')}
 function hwRenderTest(){
  $('workHead').innerHTML='<h1>📝 Test: Hardware und Software</h1><p>Informatik · Klasse 5 · 20 Aufgaben · 20 Punkte</p><p class="notice">Bitte beantworte alle Aufgaben. Deine Note erscheint erst nach der Abgabe.</p><label for="student">Vorname und Nachname</label><input id="student" maxlength="80" autocomplete="off" placeholder="Dein Name">';
@@ -218,7 +218,7 @@ function hwRenderTest(){
 }
 function hwFinishTest(){const name=$('student').value.trim();if(!name){alert('Bitte gib deinen Namen ein.');return}const answers=hwCollect(HW_TEST);if(answers.some(a=>!a.given)&&!confirm('Einige Antworten fehlen. Trotzdem abgeben?'))return;const score=answers.filter(a=>a.correct).length;
  $('resultBody').innerHTML=`<div class="result"><p><strong>${escapeHTML(name)}</strong> · Informatik · Klasse 5</p><p>Hardware und Software · ${new Date().toLocaleDateString('de-DE')}</p><div class="score">${score} / 20 Punkte</div><div class="score">Note ${grade(score)}</div><p class="small">Notenschlüssel: 19–20 = 1 · 15–18 = 2 · 12–14 = 3 · 8–11 = 4 · 4–7 = 5 · 0–3 = 6.</p></div>`+renderAnswers(answers);
- $('results').querySelector('#nextLevel')?.remove();$('screenshotNotice').style.display='block';show('results');
+ captureTestResult(name,answers,score);$('results').querySelector('#nextLevel')?.remove();$('pdfNotice').style.display='block';show('results');
 }
 
 // Ablaufsteuerung: Modi bestimmen die Ansicht, Engines die Aufgabenmechanik.
@@ -236,9 +236,10 @@ const activityEngines={
  hardwareTest:{start:hwStartTest,finish:hwFinishTest}
 };
 function resetActivityState(){
+ clearTestResult();
  algoPhase=null;practiceState=null;lessonPage=0;lessonResponses={};algoOrderSelections={};
  hwStage=0;hwAnswers=[];hwName='';sortStage=0;sortAssignments={};selectedCard=null;sortOrder=[];
- $('nextLevel')?.remove();$('screenshotNotice').style.display='none';
+ $('nextLevel')?.remove();$('pdfNotice').style.display='none';
  document.body.classList.remove('print-notebook','print-book-sources');
 }
 function initializeActivities(){

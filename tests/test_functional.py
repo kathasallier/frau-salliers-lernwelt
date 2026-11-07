@@ -284,7 +284,7 @@ class LearningWorldTests(unittest.TestCase):
                 self.assertIn('Note 1', self.page.locator('#resultBody').inner_text())
                 self.assertIn('Funktionstest <Name>', self.page.locator('#resultBody').inner_text())
                 self.assertEqual(self.page.locator('#resultBody name').count(), 0)
-                self.assertTrue(self.page.locator('#screenshotNotice').is_visible())
+                self.assertTrue(self.page.locator('#pdfNotice').is_visible())
                 self.assert_result_print()
                 self.page.locator('#again').click()
                 self.page.once('dialog', lambda d: d.accept(code))
@@ -607,6 +607,69 @@ class LearningWorldTests(unittest.TestCase):
             self.assertIn('Darauf kommt es an:',self.page.locator('#resultBody').inner_text())
             self.assertEqual(self.page.locator('#resultBody .score').count(),0)
             if stage<2:self.page.locator('#nextLevel').click()
+
+    def test_direct_result_pdf_download_for_all_tests(self):
+        import fitz,re
+        for task_id in ['binary-test','hardware-test','algo-test']:
+            with self.subTest(module=task_id):
+                self.catalog(task_id)
+                code=self.page.evaluate('(id)=>TEST_CODES[id]',task_id)
+                self.page.once('dialog',lambda d:d.accept(code))
+                self.page.locator(f'[data-task="{task_id}"]').click()
+                self.assertFalse(self.page.locator('#downloadTestPdf').is_visible())
+                name='Jörg Müller <b> / A'
+                self.page.locator('#student').fill(name)
+                questions=self.page.evaluate('current.questions')
+                prefix='hwq' if task_id=='hardware-test' else 'q'
+                self.answer_questions(questions,prefix)
+                field=self.page.locator('#'+prefix+'0')
+                if questions[0].get('choices'):
+                    field.select_option(next(c for c in questions[0]['choices'] if c!=questions[0]['a']))
+                else:field.fill('999')
+                self.page.locator('#finish').click()
+                self.assertTrue(self.page.locator('#downloadTestPdf').is_visible())
+                self.assertNotIn('Screenshot',self.page.locator('#pdfNotice').inner_text())
+                snapshot=self.page.evaluate('testResultSnapshot')
+                self.assertEqual(snapshot['score'],19)
+                self.page.evaluate('window.print=()=>{window.printCalls=(window.printCalls||0)+1}')
+                before=self.page.evaluate('window.printCalls||0')
+                # Hidden input changes must not alter an already submitted result.
+                self.page.locator('#student').evaluate("e=>e.value='Anderer Name'")
+                if task_id=='binary-test':
+                    self.page.evaluate("()=>{window.originalPdfBuild=buildTestResultPdf;buildTestResultPdf=async()=>{throw new Error('Testfehler')}}")
+                    self.page.locator('#downloadTestPdf').click()
+                    self.assertIn('erneut',self.page.locator('#pdfDownloadStatus').inner_text())
+                    self.assertFalse(self.page.locator('#downloadTestPdf').is_disabled())
+                    self.page.evaluate('()=>{buildTestResultPdf=window.originalPdfBuild}')
+                with self.page.expect_download() as event:
+                    self.page.locator('#downloadTestPdf').click()
+                download=event.value
+                self.assertIsNone(download.failure())
+                self.assertTrue(download.suggested_filename.endswith('_'+snapshot['fileDate']+'.pdf'))
+                self.assertNotRegex(download.suggested_filename,r'[<>:"/\\|?*]')
+                self.assertIn('Jörg_Müller',download.suggested_filename)
+                payload=Path(download.path()).read_bytes()
+                if task_id=='algo-test':Path('/tmp/lernwelt045-algo.pdf').write_bytes(payload)
+                self.assertTrue(payload.startswith(b'%PDF-'))
+                pdf=fitz.open(stream=payload,filetype='pdf')
+                text='\n'.join(page.get_text() for page in pdf)
+                normalized=' '.join(text.split())
+                for value in [name,snapshot['topic'],snapshot['subject'],snapshot['date'],'19 / 20 Punkte','Note 1','Korrektur:']:
+                    self.assertIn(value,normalized)
+                self.assertNotIn('Anderer Name',text)
+                for question in questions:
+                    self.assertIn(' '.join(question['q'].split()),normalized)
+                self.assertGreater(len(pdf),1)
+                for i,page in enumerate(pdf):
+                    self.assertIn(f'Seite {i+1} / {len(pdf)}',page.get_text())
+                if task_id=='algo-test':self.assertTrue(any(page.get_images() for page in pdf))
+                self.assertEqual(self.page.evaluate('window.printCalls||0'),before)
+                self.page.wait_for_function("document.getElementById('downloadTestPdf').disabled===false")
+                with self.page.expect_download():self.page.locator('#downloadTestPdf').click()
+                self.open('algo-general-practice')
+                self.assertFalse(self.page.locator('#downloadTestPdf').is_visible())
+                self.assertIsNone(self.page.evaluate('testResultSnapshot'))
+                pdf.close()
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})

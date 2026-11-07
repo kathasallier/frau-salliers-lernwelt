@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.44
+# Frau Salliers Lernwelt – Version 0.45
 
 Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Hardware und
 Software (Klasse 5), Binärsystem und Algorithmen (Klasse 6). Weitere Bereiche
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.44.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.45.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.44.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.45.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -82,7 +82,7 @@ vorgeschaltete Übungen. Er bleibt mit 20 geschlossenen Fragen automatisch
 kontrollierbar. Sieben Testfragen wurden passend zum verbleibenden Lernstoff
 ersetzt. Hardware und Binärsystem behalten ihre bisherigen Abläufe.
 
-18 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
+19 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
 zusätzlich denselben Stand als exportierte Einzeldatei ohne Netzwerk.
 
 Seit 0.43 zeigt Lernwelt 1, Folie 6 nur das Eierbild; die zusätzliche Grafik
@@ -100,3 +100,30 @@ Thema, Fach und Klasse.
 
 Die neuen geschlossenen Vorbereitungsaufgaben erklären nach der Auswertung,
 warum die Lösung passt (bei Schleifen einschließlich konkreter Zählerwerte).
+
+
+## Testergebnisse als PDF abgeben (seit 0.45)
+
+Nach jedem der drei Tests erscheint „Testergebnis als PDF herunterladen“.
+Der Button lädt unmittelbar eine PDF herunter, ohne den Druckdialog zu öffnen.
+Die Datei enthält Name, Thema, Fach, Klasse, Abgabedatum, Punkte, Note und alle
+Fragen/Antworten einschließlich Korrekturen, Pseudocode und Testdiagrammen.
+Jede Seite trägt eine Kopfzeile und eine Seitennummer. Name und Thema bilden
+zusammen mit dem Datum den bereinigten Dateinamen. Der Screenshot-Hinweis entfällt.
+Die Schüler speichern die Datei und geben sie bei ihrer Lehrkraft ab.
+
+Die PDF verwendet einen Schnappschuss des abgegebenen Tests. Nachträgliche
+Formularänderungen verändern diesen nicht. Beim Start eines anderen Moduls
+werden die zugehörigen Download-Daten aus dem aktuellen Zustand entfernt.
+Ein erneuter Download ist möglich, solange das Ergebnis geöffnet ist.
+Übungen und die vorhandenen Druck-/PDF-Funktionen bleiben erhalten.
+
+`assets/result-pdf.js` erzeugt die PDF lokal mit jsPDF 4.2.1; Bibliothek und
+DejaVu-Schriften sind mit ihren Lizenzhinweisen im Projekt eingebettet.
+Auch die exportierte Einzeldatei benötigt dafür kein Netzwerk. Details und
+Lizenzen: `assets/vendor/`, `assets/pdf-fonts.js`.
+
+Der zusätzliche Downloadtest prüft echte PDF-Dateien für alle drei Tests,
+Umlaute, Metadaten, alle 20 Fragen, Korrekturen, Diagrammbilder, Seitenzahlen,
+sichere Dateinamen, wiederholte Downloads, Fehler-/Wiederholungsfall sowie das
+Zurücksetzen beim Modulwechsel. Er stellt sicher, dass kein Druckdialog öffnet.

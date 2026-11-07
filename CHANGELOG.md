@@ -1,5 +1,21 @@
 # Änderungen
 
+## 0.45 – direkter PDF-Download für Testergebnisse
+
+- Alle drei Tests erhalten einen Button zum direkten PDF-Download. Der
+  Screenshot-Hinweis wird durch die Anleitung zum Speichern und Abgeben ersetzt.
+- Die PDF enthält Name, Thema, Fach, Klasse, Datum, Punkte, Note und sämtliche
+  Fragen/Antworten, Korrekturen, Pseudocode und Testdiagramme. Kopfzeilen und
+  Seitenzahlen ermöglichen auch mehrseitige Abgaben.
+- Abgabezustand wird kopiert; Dateinamen werden bereinigt. Mehrfacher Download
+  und erneuter Versuch nach einem Fehler sind möglich. Ein Modulwechsel
+  entfernt den bisherigen Downloadzustand.
+- jsPDF 4.2.1 und DejaVu-Schriften samt Lizenzen lokal eingebettet; der direkte
+  Download funktioniert auch in der Offline-Einzeldatei. Übungsabläufe und
+  bisherige Druckfunktionen bleiben erhalten.
+- 19 Browserregressionen einschließlich echter PDF-Downloads für alle Tests,
+  Text-/Bildprüfung, Abgabedaten, Korrekturen und Fehler-/Wiederholungsfall.
+
 ## 0.44 – Testfragen und gezielte Testvorbereitung
 
 - Aufgabe 5: gleiche drei Schritte (Material einpacken, abwischen, trocken

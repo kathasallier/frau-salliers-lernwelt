@@ -174,3 +174,6 @@ header .wrap{padding-top:7px!important;padding-bottom:7px!important;min-height:4
 .notebook-drawing{margin-top:18px;padding-top:10px;border-top:1px solid #c5a76e}
 .notebook-drawing .lesson-figure{max-width:480px;margin:12px auto}
 @media print{.notebook-drawing{break-before:auto}.notebook-drawing .lesson-diagram{max-height:150mm!important}.notebook-draw-space{height:45mm;border:1px solid #bbb;margin:8mm 0}.notebook-drawing .lesson-figure{break-inside:avoid}body.print-notebook #notebookPrint .print-task:has(.notebook-drawing){break-inside:auto;page-break-inside:auto}}
+
+[hidden]{display:none!important}
+@media print{#pdfNotice,#pdfDownloadStatus{display:none!important}}

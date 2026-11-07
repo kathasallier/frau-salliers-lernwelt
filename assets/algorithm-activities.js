@@ -117,7 +117,8 @@ function finishAlgoActivity(){
  const isTest=algoPhase==='test';
  $('resultBody').innerHTML=`<div class="result"><h2>${isTest?'Testergebnis':algoPhase==='preparation'?'Deine Vorbereitung':'Deine Auswertung'}</h2>${isTest?`<p class="test-result-topic"><strong>Thema: ${escapeHTML(current.topic)}</strong> · ${escapeHTML(current.subject)} · Klasse ${selectedGrade||current.grades[0]}</p><p><strong>${escapeHTML($('student').value.trim())}</strong></p>`:''}${isTest?`<div class="score">${points} / ${scored.length} Punkte</div>`:'<p>Eigene Texte musst du selbst vergleichen; sie werden nicht automatisch inhaltlich bewertet.</p>'}<p>${answers.filter(a=>a.selfCheck).length?`${answers.filter(a=>a.selfCheck).length} freie Aufgaben zur Selbstkontrolle, ohne automatische Bewertung.`:'Die geschlossenen Antworten wurden automatisch geprüft.'}</p>${isTest?`<div class="score">Note ${grade(points)}</div><p>Notenschlüssel (20 Punkte): 19–20 = 1 · 15–18 = 2 · 12–14 = 3 · 8–11 = 4 · 4–7 = 5 · 0–3 = 6.</p>`:''}${extra}</div>`+algoAnswerFeedback(answers);
  $('nextLevel')?.remove();if(next){const button=document.createElement('button');button.id='nextLevel';button.textContent=next.label;button.onclick=next.run;$('results').querySelector('.actions').prepend(button)}
- $('screenshotNotice').style.display=isTest?'block':'none';show('results');
+ if(isTest)captureTestResult($('student').value.trim(),answers,points);
+ $('pdfNotice').style.display=isTest?'block':'none';show('results');
 }
 function renderAlgoPrintBody(q){
  const figure=q.figure?`<div class="algo-print-figure" style="max-width:125mm;margin:8mm auto">${namespaceAlgoFigure(algoFigure(q.figure),q.id)}</div>`:'';
