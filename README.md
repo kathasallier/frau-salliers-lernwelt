@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.49
+# Frau Salliers Lernwelt – Version 0.50
 
 Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Das Binärsystem sowie Algorithmen in Klasse 6.
 Das Klasse-5-Thema ist vorerst aus dem Angebot genommen. Weitere Bereiche
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.49.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.50.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.49.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.50.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -243,3 +243,20 @@ erstellt.
 24 Funktionstests prüfen zusätzlich die zurückgestellten Bereiche, den neuen
 Lernablauf, die Schrittfolge und ausfüllbare Tabellen. Alle aktiven Übungen,
 Zwischenfragen und Druck-/PDF-Funktionen werden auch offline geprüft.
+
+## Kapitelstruktur und Durchsicht (0.50)
+
+Nach Informatik → Klasse 6 folgt die Kapitelwahl: Kapitel 1 „Algorithmen und
+Problemlösen“ enthält Thema 1 „Binärsystem, Bits und Bytes“ und Thema 2
+„Algorithmen“. Bestehende Modulkennungen und Inhalte von Algorithmen bleiben
+unverändert. Der Übungstest steht auf der Startseite unter den Fächern.
+
+Lernwelt 1 zum Binärsystem umfasst jetzt 17 Inhaltsseiten. Das Lampenbeispiel
+folgt unmittelbar auf die Einführung der Lampenzustände. Der doppelte
+Zeichenauftrag entfällt; die vollständige Zähltafel samt Arbeitsauftrag steht
+im ersten Merkteil. In Übungsteil 3, Aufgabe 1, wird die berechnete Summe
+nicht angezeigt. Die Stellenwerte und schaltbaren Lampen bleiben sichtbar.
+
+25 Browserregressionen prüfen die Kapitel-/Themenwahl, sämtliche aktiven
+Lernmodule und Übungen, Druck und Ergebnis-PDFs sowie die Offline-Einzeldatei.
+Frühere Abschnitte dokumentieren den jeweiligen Entwicklungsstand.

@@ -1,5 +1,16 @@
 # Änderungen
 
+## 0.50 – Kapitelwahl und weitere Korrekturen am Binärsystem
+
+- Klasse 6 erhält Kapitel 1 „Algorithmen und Problemlösen“ mit den nummerierten
+  Themen Binärsystem, Bits und Bytes sowie Algorithmen. Rücknavigation angepasst.
+- Übungstest auf der Startseite unter die Fächer verschoben.
+- Lampenbeispiel direkt nach der Einführung; doppelten Zeichenauftrag entfernt.
+  Vollständige Zähltafel in den ersten Merkteil übernommen; 17 Inhaltsseiten.
+- In Übungsteil 3, Aufgabe 1, keine vorweggenommene Summe mehr.
+- Algorithmen-Inhalte unverändert; 25 Funktionstests für Navigation, alle aktiven
+  Module, Übungen, Druck, PDF und Offline-Nutzung.
+
 ## 0.49 – Korrekturen an Lernwelt 1, Umfang vorerst reduziert
 
 - Dezimalsystem vor Binärsystem und Lampen; passende Bildunterschriften und

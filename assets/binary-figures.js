@@ -57,7 +57,7 @@ function lampsCaption(spec){
 
 
 function renderBinaryLampField(q,id){
- return `<div class="binary-lamp-input no-print" data-lamp-for="${id}"><div class="binary-lamp-buttons">${[128,64,32,16,8,4,2,1].map((w,i)=>`<button class="secondary" type="button" data-lamp-index="${i}" aria-pressed="false" aria-label="Stellenwert ${w} umschalten"><strong>${w}</strong><svg viewBox="0 0 50 65" aria-hidden="true"><path d="M15 42C15 32 5 29 6 18A19 19 0 0 1 44 18C45 29 35 32 35 42Z"/><rect x="15" y="44" width="20" height="13" rx="3"/></svg><span class="lamp-state">aus</span></button>`).join('')}</div><p class="lamp-readout" aria-live="polite">Binärzahl: 00000000 · Summe: 0</p></div><div class="binary-lamp-print" data-lamp-print="${id}">${renderBinaryFigure({binaryKind:'lamps',bits:'00000000'},'lamp-print-'+id)}</div><input type="hidden" id="${id}" value="">${algoPrintValue(id)}`;
+ return `<div class="binary-lamp-input no-print" data-lamp-for="${id}" data-hide-sum="${!!q.hideSum}"><div class="binary-lamp-buttons">${[128,64,32,16,8,4,2,1].map((w,i)=>`<button class="secondary" type="button" data-lamp-index="${i}" aria-pressed="false" aria-label="Stellenwert ${w} umschalten"><strong>${w}</strong><svg viewBox="0 0 50 65" aria-hidden="true"><path d="M15 42C15 32 5 29 6 18A19 19 0 0 1 44 18C45 29 35 32 35 42Z"/><rect x="15" y="44" width="20" height="13" rx="3"/></svg><span class="lamp-state">aus</span></button>`).join('')}</div><p class="lamp-readout" aria-live="polite">Binärzahl: 00000000${q.hideSum?'':' · Summe: 0'}</p></div><div class="binary-lamp-print" data-lamp-print="${id}">${renderBinaryFigure({binaryKind:'lamps',bits:'00000000'},'lamp-print-'+id)}</div><input type="hidden" id="${id}" value="">${algoPrintValue(id)}`;
 }
 function bindBinaryLampInputs(){
  document.querySelectorAll('[data-lamp-for]').forEach(panel=>{
@@ -67,7 +67,7 @@ function bindBinaryLampInputs(){
    const bits=buttons.map(b=>b.getAttribute('aria-pressed')==='true'?'1':'0').join('');
    document.getElementById(panel.dataset.lampFor).value=bits;
    document.querySelector(`[data-lamp-print="${panel.dataset.lampFor}"]`).innerHTML=renderBinaryFigure({binaryKind:'lamps',bits},'lamp-print-'+panel.dataset.lampFor);
-   panel.querySelector('.lamp-readout').textContent=`Binärzahl: ${bits} · Summe: ${parseInt(bits,2)}`;
+   panel.querySelector('.lamp-readout').textContent=`Binärzahl: ${bits}${panel.dataset.hideSum==='true'?'':' · Summe: '+parseInt(bits,2)}`;
   }));
  });
 }

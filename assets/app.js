@@ -3,22 +3,28 @@
 'use strict';
 let lessonPage=0,lessonResponses={},lessonStage='title';
 let practiceState=null;
-let current=null;const $=id=>document.getElementById(id);function show(id){$('downloadTestPdf').hidden=!(id==='results'&&testResultSnapshot&&current?.mode==='Test');document.body.classList.remove('mode-learn','mode-practice','mode-test');if(id==='lesson')document.body.classList.add('mode-learn');else if(id==='work'||id==='results')document.body.classList.add(current?.mode==='Test'?'mode-test':'mode-practice');for(const x of ['home','work','results','lesson'])$(x).classList.toggle('hidden',x!==id);window.scrollTo(0,0)}function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}let selectedSubject=null,selectedGrade=null,selectedTopic=null;
+let current=null;const $=id=>document.getElementById(id);function show(id){$('downloadTestPdf').hidden=!(id==='results'&&testResultSnapshot&&current?.mode==='Test');document.body.classList.remove('mode-learn','mode-practice','mode-test');if(id==='lesson')document.body.classList.add('mode-learn');else if(id==='work'||id==='results')document.body.classList.add(current?.mode==='Test'?'mode-test':'mode-practice');for(const x of ['home','work','results','lesson'])$(x).classList.toggle('hidden',x!==id);window.scrollTo(0,0)}function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}let selectedSubject=null,selectedGrade=null,selectedChapter=null,selectedTopic=null;
 const subjectIcons={'Informatik':'💻','Mathematik':'🔢','Hauswirtschaft':'🍎'};
+const courseChapters=[{id:'chapter-1',subject:'Informatik',grade:6,title:'Kapitel 1: Algorithmen und Problemlösen',topics:[{name:'Binärsystem, Bits und Bytes',title:'Thema 1: Binärsystem, Bits und Bytes'},{name:'Algorithmen',title:'Thema 2: Algorithmen'}]}];
+function chapterSelection(){return courseChapters.find(c=>c.id===selectedChapter&&c.subject===selectedSubject&&c.grade===selectedGrade)}
+function selectedTopicLabel(){return chapterSelection()?.topics.find(t=>t.name===selectedTopic)?.title||selectedTopic}
 function navStep(step){
- if(step==='Subject'){selectedSubject=null;selectedGrade=null;selectedTopic=null}
- if(step==='Grade'){selectedGrade=null;selectedTopic=null}
+ if(step==='Subject'){selectedSubject=null;selectedGrade=null;selectedChapter=null;selectedTopic=null}
+ if(step==='Grade'){selectedGrade=null;selectedChapter=null;selectedTopic=null}
+ if(step==='Chapter'){selectedChapter=null;selectedTopic=null}
  if(step==='Topic')selectedTopic=null;
- for(const n of ['Subject','Grade','Topic','Materials'])$('step'+n).classList.toggle('hidden',n!==step);
- const crumbs=[['Fächer',()=>{selectedSubject=null;navStep('Subject')}]];
+ for(const n of ['Subject','Grade','Chapter','Topic','Materials'])$('step'+n).classList.toggle('hidden',n!==step);
+ const crumbs=[['Fächer',()=>navStep('Subject')]];
  if(selectedSubject)crumbs.push([selectedSubject,()=>navStep('Grade')]);
- if(selectedGrade)crumbs.push(['Klasse '+selectedGrade,()=>navStep('Topic')]);
- if(selectedTopic)crumbs.push([selectedTopic,()=>navStep('Materials')]);
+ if(selectedGrade)crumbs.push(['Klasse '+selectedGrade,()=>navStep('Chapter')]);
+ if(selectedChapter)crumbs.push([chapterSelection().title,()=>navStep('Topic')]);
+ if(selectedTopic)crumbs.push([selectedTopicLabel(),()=>navStep('Materials')]);
  $('breadcrumbs').innerHTML=crumbs.map((c,i)=>`<button class="crumb" data-crumb="${i}">${escapeHTML(c[0])}</button>`).join('<span>›</span>');
  document.querySelectorAll('[data-crumb]').forEach(b=>b.onclick=()=>crumbs[Number(b.dataset.crumb)][1]());
 }
-function chooseSubject(sub){selectedSubject=sub;selectedGrade=null;selectedTopic=null;renderGrades();navStep('Grade')}
-function chooseGrade(g){selectedGrade=g;selectedTopic=null;renderTopics();navStep('Topic')}
+function chooseSubject(sub){selectedSubject=sub;selectedGrade=null;selectedChapter=null;selectedTopic=null;renderGrades();navStep('Grade')}
+function chooseGrade(g){selectedGrade=g;selectedChapter=null;selectedTopic=null;renderChapters();navStep('Chapter')}
+function chooseChapter(id){selectedChapter=id;selectedTopic=null;renderTopics();navStep('Topic')}
 function chooseTopic(t){selectedTopic=t;catalog();navStep('Materials')}
 function renderSubjects(){
  $('subjectTiles').innerHTML=Object.keys(subjectIcons).map(sub=>`<button class="nav-tile subject-tile" data-sub="${sub}"><span class="tile-icon">${subjectIcons[sub]}</span><strong>${sub}</strong><span class="muted">Themen entdecken →</span></button>`).join('');
@@ -28,13 +34,18 @@ function renderGrades(){
  $('gradeTiles').innerHTML=[5,6,7,8,9,10].map(g=>`<button class="nav-tile grade-tile" data-grade="${g}"><span class="tile-icon">🎒</span><strong>Klasse ${g}</strong></button>`).join('');
  document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>chooseGrade(Number(b.dataset.grade)));
 }
+function renderChapters(){
+ const chapters=courseChapters.filter(c=>c.subject===selectedSubject&&c.grade===selectedGrade&&c.topics.some(topic=>tasks.some(t=>t.subject===c.subject&&t.grades.includes(c.grade)&&t.topic===topic.name)));
+ $('chapterTiles').innerHTML=chapters.length?chapters.map(c=>`<button class="nav-tile chapter-tile" data-chapter="${c.id}"><span class="tile-icon">📘</span><strong>${escapeHTML(c.title)}</strong><span class="muted">Themen auswählen →</span></button>`).join(''):'<div class="notice">Für diese Klasse gibt es noch keine Kapitel. Wähle eine andere Klassenstufe.</div>';
+ document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>chooseChapter(b.dataset.chapter));
+}
 function renderTopics(){
- const topics=[...new Set(tasks.filter(t=>t.subject===selectedSubject&&t.grades.includes(selectedGrade)).map(t=>t.topic))].sort();
- $('topicTiles').innerHTML=topics.length?topics.map(t=>`<button class="nav-tile topic-tile" data-topic="${escapeHTML(t)}"><span class="tile-icon">${t==='Algorithmen'?'🔀':'📚'}</span><strong>${escapeHTML(t)}</strong><span class="muted">Grundlagen und Anwendungen →</span></button>`).join(''):'<div class="notice">Für diese Klasse gibt es noch keine Themen. Wähle eine andere Klassenstufe.</div>';
+ const topics=(chapterSelection()?.topics||[]).filter(topic=>tasks.some(t=>t.subject===selectedSubject&&t.grades.includes(selectedGrade)&&t.topic===topic.name));
+ $('topicTiles').innerHTML=topics.map(t=>`<button class="nav-tile topic-tile" data-topic="${escapeHTML(t.name)}"><span class="tile-icon">${t.name==='Algorithmen'?'🔀':'📚'}</span><strong>${escapeHTML(t.title)}</strong><span class="muted">Grundlagen und Anwendungen →</span></button>`).join('');
  document.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>chooseTopic(b.dataset.topic));
 }
 function catalog(){
- $('topicTitle').textContent=selectedTopic;
+ $('topicTitle').textContent=selectedTopicLabel();
  const found=tasks.filter(t=>t.subject===selectedSubject&&t.grades.includes(selectedGrade)&&t.topic===selectedTopic);
  $('catalog').innerHTML=Object.entries(activityModes).map(([mode,config])=>{
   const materials=found.filter(t=>t.mode===mode);

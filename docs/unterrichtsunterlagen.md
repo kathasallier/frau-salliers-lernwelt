@@ -246,3 +246,10 @@ Die neuen handschriftlichen Vorgaben begrenzen Lernwelt 1 auf das Binärsystem.
 Die Lehrbuch-Zähltafel bis 63 wird ausdrücklich mit vier Stellenwerten bis 15
 geübt. Bit/Byte folgen erst in Lernwelt 2. Testvorbereitung und Test sowie
 das Klasse-5-Thema sind vorerst aus dem aktiven Angebot entfernt.
+
+## Weitere Lehrkraftkorrekturen 0.50
+
+Die nicht durchgestrichenen Anmerkungen wurden auf die Seitenzählung von 0.49
+bezogen: Seite 8 entfällt, Seite 9 folgt auf Seite 4. Die Zähltafel von Seite 18
+steht vollständig mit Arbeitsauftrag im ersten Merkteil. Übungsteil 3, Aufgabe 1,
+zeigt keine berechnete Summe. Fachliche Inhalte anderer Themen bleiben erhalten.

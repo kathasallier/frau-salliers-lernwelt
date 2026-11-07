@@ -211,3 +211,5 @@ button.secondary,.secondary{background:#e4effa;color:var(--school-navy)}button.s
 .binary-answer-table{overflow-x:auto;margin:12px 0}.binary-answer-table table{width:100%;min-width:420px;border-collapse:collapse}.binary-answer-table th,.binary-answer-table td{border:1px solid #87a8c5;padding:8px;text-align:center}.binary-answer-table th{background:#e0eef9}.binary-answer-table input{min-width:60px;padding:8px;margin:0}@media print{.binary-answer-table{overflow:visible}.binary-answer-table table{min-width:0}.binary-answer-table th,.binary-answer-table td{padding:5px;font-size:10pt}}
 
 .lamp-readout{padding:12px;border-left:4px solid #e58126;background:#edf5fc;border-radius:8px;font-size:1.05rem}
+
+.crumb{max-width:100%;white-space:normal;text-align:left}.chapter-tile{grid-column:1/-1;min-height:150px}.chapter-tile strong{max-width:100%}.try-test-card{margin-top:28px}
