@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.43
+# Frau Salliers Lernwelt – Version 0.44
 
 Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Hardware und
 Software (Klasse 5), Binärsystem und Algorithmen (Klasse 6). Weitere Bereiche
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.43.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.44.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.43.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.44.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -82,9 +82,21 @@ vorgeschaltete Übungen. Er bleibt mit 20 geschlossenen Fragen automatisch
 kontrollierbar. Sieben Testfragen wurden passend zum verbleibenden Lernstoff
 ersetzt. Hardware und Binärsystem behalten ihre bisherigen Abläufe.
 
-17 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
+18 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
 zusätzlich denselben Stand als exportierte Einzeldatei ohne Netzwerk.
 
 Seit 0.43 zeigt Lernwelt 1, Folie 6 nur das Eierbild; die zusätzliche Grafik
 entfällt. Die Algorithmus-Übungen und ihre Auswertung enthalten keine Hinweise
 auf fehlende Punkte mehr. Rückmeldungen und Textvergleich bleiben erhalten.
+
+Seit 0.44 übt die Testvorbereitung mit 15 eigenständigen Aufgaben alle
+Testkompetenzen in drei Teilen: Anweisungen/Eigenschaften, Diagramme/Wege und
+Schleifen/Entscheidungen. Die vorhandenen offenen Anwendungen bleiben erhalten.
+Testfrage 5 vergleicht nur Umordnungen derselben drei Schritte; Frage 19 prüft
+eine verletzte Eigenschaft an einem konkreten Beispiel. Die Positionen richtiger
+Auswahlantworten sind verteilt und bei Teilfragen unterschiedlich angeordnet;
+Druck und Online-Test verwenden dieselbe Reihenfolge. Das Testergebnis nennt
+Thema, Fach und Klasse.
+
+Die neuen geschlossenen Vorbereitungsaufgaben erklären nach der Auswertung,
+warum die Lösung passt (bei Schleifen einschließlich konkreter Zählerwerte).

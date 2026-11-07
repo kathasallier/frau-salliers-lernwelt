@@ -198,14 +198,14 @@ class LearningWorldTests(unittest.TestCase):
                 pages = self.page.evaluate('current.pages')
                 for i, questions in enumerate(pages):
                     if task_id.startswith('algo-'):
-                        self.assertNotIn('Punkte',self.page.locator('#work').inner_text())
+                        self.assertNotRegex(self.page.locator('#work').inner_text(),r'(?i)(?:ohne|keine)\s+Punkte|\d+\s*/\s*\d+\s+Punkte')
                     self.answer_questions(questions)
                     self.page.locator('#finish').click()
                     self.assertTrue(self.page.locator('#results').is_visible())
                     self.assert_result_print()
                     graded = sum(not q.get('free') for q in questions)
                     if task_id.startswith('algo-'):
-                        self.assertNotIn('Punkte',self.page.locator('#resultBody').inner_text())
+                        self.assertNotRegex(self.page.locator('#resultBody').inner_text(),r'(?i)(?:ohne|keine)\s+Punkte|\d+\s*/\s*\d+\s+Punkte')
                         self.assertEqual(self.page.locator('#resultBody .score').count(),0)
                         self.assertIn('selbst vergleichen',self.page.locator('#resultBody').inner_text())
                     else:
@@ -279,6 +279,8 @@ class LearningWorldTests(unittest.TestCase):
                 self.answer_questions(questions, 'hwq' if task_id == 'hardware-test' else 'q')
                 self.page.locator('#finish').click()
                 self.assertIn('20 / 20 Punkte', self.page.locator('#resultBody').inner_text())
+                if task_id=='algo-test':
+                    self.assertIn('Thema: Algorithmen',self.page.locator('.test-result-topic').inner_text())
                 self.assertIn('Note 1', self.page.locator('#resultBody').inner_text())
                 self.assertIn('Funktionstest <Name>', self.page.locator('#resultBody').inner_text())
                 self.assertEqual(self.page.locator('#resultBody name').count(), 0)
@@ -426,7 +428,7 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_independent_learning_without_external_material(self):
         import re
-        references = re.compile(r'\b(?:Buch|Buchseite[n]?|Buchabbildung[en]*|Übungsheft|Unterlagen|Originalfoto|Lösungsseite)\b', re.I)
+        references = re.compile(r'\b(?:(?:im|aus dem|siehe|lies im)\s+Buch|Buchseite[n]?|Buchabbildung[en]*|Übungsheft|Unterlagen|Originalfoto|Lösungsseite)\b', re.I)
         data = self.page.evaluate('''()=>({
             tasks:tasks.map(t=>[t.title,t.description]),
             slides:tasks.filter(t=>t.mode==='Lernen').flatMap(t=>t.slides),
@@ -450,9 +452,9 @@ class LearningWorldTests(unittest.TestCase):
         self.assertNotIn('algo-book-practice',data['ids'])
         self.assertEqual(sum(q.get('free',False) for bank in data['banks'] for page in bank for q in page),11)
         questions=[q for bank in data['banks'] for page in bank for q in page]+data['prep']+data['test']
-        self.assertEqual(len(questions),47)
-        self.assertEqual(len({q['id'] for q in questions}),47)
-        self.assertEqual(len({q['q'].strip().lower() for q in questions}),47)
+        self.assertEqual(len(questions),55)
+        self.assertEqual(len({q['id'] for q in questions}),55)
+        self.assertEqual(len({q['q'].strip().lower() for q in questions}),55)
         self.assertEqual([len(bank) for bank in data['banks']],[3,3,3])
         for bank in data['banks']:
             flat=[q for page in bank for q in page]
@@ -575,6 +577,36 @@ class LearningWorldTests(unittest.TestCase):
         self.assertEqual(self.page.locator('#beginAlgoTest').count(),0)
         self.assertEqual(self.page.locator('.algo-task').count(),20)
         self.assertEqual(self.page.locator('.algo-task textarea, .algo-task input:not([type=hidden])').count(),0)
+
+    def test_release044_test_choices_and_targeted_preparation(self):
+        from collections import Counter
+        data=self.page.evaluate('''()=>({test:algoTestQuestions,prep:algoPracticeReview,goals:algoPreparationGoals})''')
+        q5=data['test'][4]
+        expected={'Material einpacken','Abwischen','Trocken wischen'}
+        for choice in q5['choices']:
+            self.assertEqual(set(choice.split(' → ')),expected)
+        self.assertEqual(len(set(q5['choices'])),3)
+        self.assertEqual(q5['a'],'Material einpacken → Abwischen → Trocken wischen')
+        self.assertEqual(data['test'][18]['a'],'Ausführbarkeit')
+        self.assertIn('200 ml',data['test'][18]['q'])
+        positions=Counter(q['choices'].index(q['a']) for q in data['test'] if len(q.get('choices',[]))==3)
+        self.assertEqual(set(positions),{0,1,2})
+        self.assertLessEqual(max(positions.values())-min(positions.values()),2)
+        for q in data['test']:
+            if q.get('parts'):
+                self.assertNotEqual([p['choices'].index(p['a']) for p in q['parts']],[0,1,2])
+        self.assertEqual([len(page) for page in data['prep']],[5,5,5])
+        ids={q['id'] for page in data['prep'] for q in page}
+        self.assertTrue({'r13','r14','r15','r16','r17','r18','r19','r20'}<=ids)
+        self.open('algo-review-practice')
+        for stage in range(3):
+            self.assertEqual(self.page.locator('.preparation-goal').inner_text(),data['goals'][stage])
+            self.answer_questions(self.page.evaluate('current.pages[practiceState.page]'))
+            self.page.locator('#finish').click()
+            self.assertTrue(self.page.locator('.answer-explanation').count()>0)
+            self.assertIn('Darauf kommt es an:',self.page.locator('#resultBody').inner_text())
+            self.assertEqual(self.page.locator('#resultBody .score').count(),0)
+            if stage<2:self.page.locator('#nextLevel').click()
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})

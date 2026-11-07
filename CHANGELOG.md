@@ -1,5 +1,20 @@
 # Änderungen
 
+## 0.44 – Testfragen und gezielte Testvorbereitung
+
+- Aufgabe 5: gleiche drei Schritte (Material einpacken, abwischen, trocken
+  wischen) in unterschiedlichen Reihenfolgen. Aufgabe 19: verletzte Eigenschaft
+  an einem konkreten Beispiel selbst erkennen.
+- Richtige Auswahlantworten auf unterschiedliche Positionen verteilt, auch bei
+  Zuordnungsaufgaben. Gedruckter und digitaler Test bleiben identisch.
+- Testergebnis nennt das Thema Algorithmen, Fach und Klasse.
+- Neue Vorbereitungsaufgaben erklären nach der Abgabe den Lösungsweg.
+- 18 Funktionstests prüfen alle Module, Übungen, Testbewertung und Druck/PDF
+  sowie Antwortverteilung und Vorbereitung; zusätzlich Offline-Einzeldatei.
+- Testvorbereitung auf 15 unterschiedliche Aufgaben in drei Kompetenzbereichen
+  erweitert: Eigenschaften/Anweisungen, Symbole/Diagramme/Wege und Schleifen/
+  Entscheidungen. Bisherige offene Anwendungsaufgaben bleiben erhalten.
+
 ## 0.43 – Folie 6 und Übungshinweise vereinfacht
 
 - Auf Lernwelt 1, Folie 6 bleibt das Eierbild erhalten; die zusätzliche

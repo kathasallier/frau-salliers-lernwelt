@@ -5,8 +5,13 @@ let algoPhase=null;
 const algoPageTitles={
  'algo-general-practice':['Anleitungen erkennen und ordnen','Präzise formulieren','Eigene Abläufe entwickeln'],
  'algo-display-practice':['Symbole und Diagramme','Verzweigungen und Schleifen','Wege anwenden'],
- 'algo-review-practice':['Planen und Fehler finden','Wege beschreiben','Transfer und Selbstkontrolle']
+ 'algo-review-practice':['Anweisungen und Eigenschaften','Diagramme und Wege','Schleifen und Entscheidungen']
 };
+const algoPreparationGoals=[
+ 'Für den Test: Eigenschaften an Beispielen erkennen, präzise Anweisungen wählen und abhängige Schritte ordnen.',
+ 'Für den Test: Symbole zuordnen, Aktionen zählen und Wege sowie Richtungswechsel lesen.',
+ 'Für den Test: Zähler Schritt für Schritt verfolgen, Rückpfeile und Abbruchbedingungen prüfen sowie Entscheidungen anwenden.'
+];
 function algoText(value){return String(value).normalize('NFC').trim().toLocaleLowerCase('de-DE').replace(/\s+/g,' ').replace(/[.!?]+$/,'')}
 function algoNumbers(value){const text=String(value).replace(/[\[\]]/g,'').trim();return text?text.split(/[\s,;]+/).map(Number):[]}
 function algoCorrect(q,value){
@@ -56,6 +61,7 @@ function renderAlgoWork(){
  $('workHead').innerHTML=`<h1>${escapeHTML(heading)}</h1><p>Informatik · Klasse ${selectedGrade||6} · ${algoPhase==='preparation'?'Vorbereitung':current.mode}</p>`+
  (practiceState?`<div class="levelbar">${algoPageTitles[current.id].map((title,i)=>`<span class="levelpill ${i===stage?'active':i<stage?'done':''}">${i+1}. ${escapeHTML(title)}</span>`).join('')}</div><h2>Teil ${stage+1} von ${current.pages.length}: ${escapeHTML(algoPageTitles[current.id][stage])}</h2>`:'')+
  (algoPhase==='test'?'<p class="notice">20 unterschiedliche Aufgaben · 20 Punkte. Wähle Antworten, ordne zu oder lege eine Reihenfolge; es gibt keine offenen Texteingaben. Bei einer Zuordnung müssen alle Teilantworten stimmen. Lösungen und Note erscheinen nach der Abgabe.</p><label for="student">Dein Name</label><input id="student" maxlength="80" autocomplete="off">':'<p>Ordne, untersuche, rechne und formuliere selbst. Geschlossene Aufgaben werden geprüft. Wichtig: Eigene Texte und Pläne werden nicht inhaltlich automatisch bewertet. Vergleiche sie nach der Abgabe selbst mit Beispiel und Prüffragen.</p>')+
+ (current.id==='algo-review-practice'?`<p class="notice preparation-goal">${escapeHTML(algoPreparationGoals[stage])}</p>`:'')+
  `<div class="actions no-print"><button type="button" id="printAlgoWork" class="secondary">Aufgaben und eigene Antworten drucken / als PDF</button>${algoPhase==='preparation'?'<button type="button" id="beginAlgoTest">Zum Test · Zugangscode eingeben</button>':''}</div>`;
  $('questions').innerHTML=questions.map(algoQuestionHTML).join('');
  document.querySelectorAll('[data-order-q]').forEach(button=>button.addEventListener('click',()=>{
@@ -88,12 +94,12 @@ function updateAlgoPrint(){
 window.addEventListener('beforeprint',updateAlgoPrint);
 function collectAlgoAnswers(questions){
  return questions.map((q,i)=>{
-  if(q.parts){const values=q.parts.map((_,j)=>$('q'+i+'-part'+j).value.trim());return {q:q.q,given:values.map((v,j)=>q.parts[j].label+': '+(v||'–')).join('\n'),missing:values.some(v=>!v),correct:q.parts.every((p,j)=>algoCorrect(p,values[j])),a:q.parts.map(p=>p.label+': '+p.a).join('\n')}}
-  const value=$('q'+i).value.trim();return {q:q.q,given:value,missing:!value,correct:q.free?null:algoCorrect(q,value),a:q.free?q.sample:q.a,selfCheck:!!q.free,checks:q.checks||[],minSteps:q.minSteps};
+  if(q.parts){const values=q.parts.map((_,j)=>$('q'+i+'-part'+j).value.trim());return {q:q.q,explanation:q.why,given:values.map((v,j)=>q.parts[j].label+': '+(v||'–')).join('\n'),missing:values.some(v=>!v),correct:q.parts.every((p,j)=>algoCorrect(p,values[j])),a:q.parts.map(p=>p.label+': '+p.a).join('\n')}}
+  const value=$('q'+i).value.trim();return {q:q.q,explanation:q.why,given:value,missing:!value,correct:q.free?null:algoCorrect(q,value),a:q.free?q.sample:q.a,selfCheck:!!q.free,checks:q.checks||[],minSteps:q.minSteps};
  });
 }
 function algoAnswerFeedback(answers){
- return answers.map((answer,i)=>`<section class="question ${answer.selfCheck?'self-feedback':''}"><h3>${i+1}. ${escapeHTML(answer.q)}</h3><p class="answer-lines"><strong>Deine Antwort:</strong> ${escapeHTML(answer.given||'Noch nicht beantwortet.')}</p>${answer.selfCheck?`<p><strong>Selbstkontrolle – keine automatische Inhaltsbewertung</strong></p>${answer.minSteps?`<p>${answer.given.split(/\n/).filter(s=>s.trim()).length} Zeilen notiert; gefordert sind mindestens ${answer.minSteps} Schritte. Die Anzahl allein sagt nicht, ob die Lösung inhaltlich richtig ist.</p>`:''}<p class="answer-lines"><strong>Mögliches Beispiel:</strong> ${escapeHTML(answer.a)}</p><ul>${answer.checks.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul>`:`<p class="${answer.correct?'good':'bad'}">${answer.correct?'Richtig':'Noch nicht richtig'}</p>${answer.correct?'':`<p class="answer-lines"><strong>Richtige Antwort:</strong> ${escapeHTML(answer.a)}</p>`}`}</section>`).join('');
+ return answers.map((answer,i)=>`<section class="question ${answer.selfCheck?'self-feedback':''}"><h3>${i+1}. ${escapeHTML(answer.q)}</h3><p class="answer-lines"><strong>Deine Antwort:</strong> ${escapeHTML(answer.given||'Noch nicht beantwortet.')}</p>${answer.selfCheck?`<p><strong>Selbstkontrolle – keine automatische Inhaltsbewertung</strong></p>${answer.minSteps?`<p>${answer.given.split(/\n/).filter(s=>s.trim()).length} Zeilen notiert; gefordert sind mindestens ${answer.minSteps} Schritte. Die Anzahl allein sagt nicht, ob die Lösung inhaltlich richtig ist.</p>`:''}<p class="answer-lines"><strong>Mögliches Beispiel:</strong> ${escapeHTML(answer.a)}</p><ul>${answer.checks.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul>`:`<p class="${answer.correct?'good':'bad'}">${answer.correct?'Richtig':'Noch nicht richtig'}</p>${answer.correct?'':`<p class="answer-lines"><strong>Richtige Antwort:</strong> ${escapeHTML(answer.a)}</p>`}${answer.explanation?`<p class="answer-explanation"><strong>Darauf kommt es an:</strong> ${escapeHTML(answer.explanation)}</p>`:''}`}</section>`).join('');
 }
 function finishAlgoActivity(){
  const questions=algoQuestions();
@@ -109,7 +115,7 @@ function finishAlgoActivity(){
   else next={label:'Weiter zu Teil '+(stage+2),run:()=>{practiceState.page++;renderAlgoWork();show('work')}};
  }else if(algoPhase==='preparation')next={label:'Zum Test · Zugangscode eingeben',run:beginAlgoTest};
  const isTest=algoPhase==='test';
- $('resultBody').innerHTML=`<div class="result"><h2>${isTest?'Testergebnis':algoPhase==='preparation'?'Deine Vorbereitung':'Deine Auswertung'}</h2>${isTest?`<p><strong>${escapeHTML($('student').value.trim())}</strong></p>`:''}${isTest?`<div class="score">${points} / ${scored.length} Punkte</div>`:'<p>Eigene Texte musst du selbst vergleichen; sie werden nicht automatisch inhaltlich bewertet.</p>'}<p>${answers.filter(a=>a.selfCheck).length?`${answers.filter(a=>a.selfCheck).length} freie Aufgaben zur Selbstkontrolle, ohne automatische Bewertung.`:'Die geschlossenen Antworten wurden automatisch geprüft.'}</p>${isTest?`<div class="score">Note ${grade(points)}</div><p>Notenschlüssel (20 Punkte): 19–20 = 1 · 15–18 = 2 · 12–14 = 3 · 8–11 = 4 · 4–7 = 5 · 0–3 = 6.</p>`:''}${extra}</div>`+algoAnswerFeedback(answers);
+ $('resultBody').innerHTML=`<div class="result"><h2>${isTest?'Testergebnis':algoPhase==='preparation'?'Deine Vorbereitung':'Deine Auswertung'}</h2>${isTest?`<p class="test-result-topic"><strong>Thema: ${escapeHTML(current.topic)}</strong> · ${escapeHTML(current.subject)} · Klasse ${selectedGrade||current.grades[0]}</p><p><strong>${escapeHTML($('student').value.trim())}</strong></p>`:''}${isTest?`<div class="score">${points} / ${scored.length} Punkte</div>`:'<p>Eigene Texte musst du selbst vergleichen; sie werden nicht automatisch inhaltlich bewertet.</p>'}<p>${answers.filter(a=>a.selfCheck).length?`${answers.filter(a=>a.selfCheck).length} freie Aufgaben zur Selbstkontrolle, ohne automatische Bewertung.`:'Die geschlossenen Antworten wurden automatisch geprüft.'}</p>${isTest?`<div class="score">Note ${grade(points)}</div><p>Notenschlüssel (20 Punkte): 19–20 = 1 · 15–18 = 2 · 12–14 = 3 · 8–11 = 4 · 4–7 = 5 · 0–3 = 6.</p>`:''}${extra}</div>`+algoAnswerFeedback(answers);
  $('nextLevel')?.remove();if(next){const button=document.createElement('button');button.id='nextLevel';button.textContent=next.label;button.onclick=next.run;$('results').querySelector('.actions').prepend(button)}
  $('screenshotNotice').style.display=isTest?'block':'none';show('results');
 }
