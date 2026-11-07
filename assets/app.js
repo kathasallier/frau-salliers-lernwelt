@@ -97,14 +97,14 @@ function start(id){
  return true;
 }
 function illustrate(slide){
- const figure=renderFigure(current.id,slide);
+ const figure=current.id==='algo-general-learn'&&slide.title==='Ausführbarkeit: sinnvolle Schritte'?'':renderFigure(current.id,slide);
  const photos=current.id==='algo-general-learn'?{
   'Anweisungen in richtiger Reihenfolge':['tea','Tasse Tee und Wasserkocher als Beispiel für einen Alltagsablauf'],
   'Algorithmen selbst entwickeln':['schoolbag','Offener Schulranzen mit Heften, Federmappe und Trinkflasche'],
   'Ausführbarkeit: sinnvolle Schritte':['eggs','Links: Ei mit Schale in einer Schüssel. Rechts: aufgeschlagenes Ei ohne Schale in der Schüssel.']
  }:{};
  const photo=photos[slide.title];
- if(figure)return (photo?`<img class="learning-photo" src="${LEARNING_IMAGES[photo[0]].src}" alt="${escapeHTML(photo[1])}">`:'')+figure;
+ if(figure||photo)return (photo?`<img class="learning-photo" src="${LEARNING_IMAGES[photo[0]].src}" alt="${escapeHTML(photo[1])}">`:'')+figure;
  if(slide.images)return `<div class="teaching-gallery">${slide.images.map(id=>{
   const card=hardwareCards.find(c=>c.id===id);
   return `<figure><img src="${EMBEDDED_IMAGES[id]}" alt="${escapeHTML(card?.name||id)}"><figcaption>${escapeHTML(card?.name||id)}</figcaption></figure>`;

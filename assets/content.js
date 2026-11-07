@@ -89,8 +89,8 @@ const sourceTeethSteps=['Zahnbürste nehmen','Zahnpasta drauftun','3 Minuten put
 const algoPreparation=[];
 
 // Umfang und Katalog nach den Unterrichtsnotizen (0.42).
-Object.assign(tasks.find(t=>t.id==='algo-review-practice'),{title:'Testvorbereitung',description:'Drei Teile zur Vorbereitung: eigene Lösungen prüfen, ohne Punkte.'});
-Object.assign(tasks.find(t=>t.id==='algo-display-practice'),{description:'Symbole, Entscheidungen, Schleifen und Wege anwenden, ohne Punkte.'});
+Object.assign(tasks.find(t=>t.id==='algo-review-practice'),{title:'Testvorbereitung',description:'Drei Teile zur Vorbereitung: eigene Lösungen prüfen.'});
+Object.assign(tasks.find(t=>t.id==='algo-display-practice'),{description:'Symbole, Entscheidungen, Schleifen und Wege anwenden.'});
 Object.assign(tasks.find(t=>t.id==='algo-test'),{description:'Direkt zum automatisch kontrollierten Test: 20 geschlossene Aufgaben.'});
 
 Object.assign(tasks.find(t=>t.id==='algo-display-learn'),{description:'Ablaufpläne, Flussdiagramme, Entscheidungen und Schleifen.'});

@@ -197,12 +197,15 @@ class LearningWorldTests(unittest.TestCase):
                 self.open(task_id)
                 pages = self.page.evaluate('current.pages')
                 for i, questions in enumerate(pages):
+                    if task_id.startswith('algo-'):
+                        self.assertNotIn('Punkte',self.page.locator('#work').inner_text())
                     self.answer_questions(questions)
                     self.page.locator('#finish').click()
                     self.assertTrue(self.page.locator('#results').is_visible())
                     self.assert_result_print()
                     graded = sum(not q.get('free') for q in questions)
                     if task_id.startswith('algo-'):
+                        self.assertNotIn('Punkte',self.page.locator('#resultBody').inner_text())
                         self.assertEqual(self.page.locator('#resultBody .score').count(),0)
                         self.assertIn('selbst vergleichen',self.page.locator('#resultBody').inner_text())
                     else:
@@ -320,7 +323,7 @@ class LearningWorldTests(unittest.TestCase):
             for i, slide in enumerate(slides):
                 for width in [1100, 390]:
                     self.page.set_viewport_size({'width': width, 'height': 900})
-                    if slide.get('visual'):
+                    if slide.get('visual') and slide['title']!='Ausführbarkeit: sinnvolle Schritte':
                         figure = self.page.locator('.illustration .lesson-figure svg')
                         self.assertEqual(figure.count(), 1, slide['title'])
                         self.assertEqual(figure.locator('title').text_content(), slide['title'])
@@ -356,7 +359,7 @@ class LearningWorldTests(unittest.TestCase):
                     self.assertEqual(figure.locator('path[d="M260 165H340"]').count(), 1)
                 if i < len(slides)-1:
                     self.page.locator('#lessonNext').click()
-        self.assertEqual(total, 29)
+        self.assertEqual(total, 28)
 
     def test_handwashing_picture_writing_and_real_toothbrush(self):
         def decoded_picture(selector):
@@ -559,6 +562,7 @@ class LearningWorldTests(unittest.TestCase):
         self.assertIn('Konkrete Schritte',self.page.locator('.illustration svg').text_content())
         self.page.evaluate('lessonPage=5;renderLesson()')
         self.assertTrue(self.page.locator('.learning-photo').evaluate('(i)=>i.complete&&i.naturalWidth>500'))
+        self.assertEqual(self.page.locator('.illustration svg').count(),0)
         self.page.evaluate('lessonPage=9;renderLesson()')
         self.assertIn('Schulweg',self.page.locator('.notebook-card').inner_text())
         self.page.evaluate('lessonPage=15;renderLesson()')

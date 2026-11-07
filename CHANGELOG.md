@@ -1,5 +1,13 @@
 # Änderungen
 
+## 0.43 – Folie 6 und Übungshinweise vereinfacht
+
+- Auf Lernwelt 1, Folie 6 bleibt das Eierbild erhalten; die zusätzliche
+  schematische Grafik entfällt.
+- Hinweise zu fehlenden Punkten aus Übungsbeschreibungen, Aufgabenansichten
+  und Auswertungen entfernt. Rückmeldungen und Selbstvergleich bleiben erhalten.
+- Testcode und automatische Testbewertung bleiben unverändert.
+
 ## 0.42 – handschriftliche Unterrichtskorrekturen
 
 - Lernwelt 1: Bilder für Rezept/Bauanleitung und Ei mit/ohne Schale, getrennte
