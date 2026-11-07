@@ -16,7 +16,7 @@ function captureTestResult(name,answers,score){
   date:`${get('day')}.${get('month')}.${get('year')}`,fileDate:`${get('year')}-${get('month')}-${get('day')}`,
   score,maximum:answers.length,mark:current.isDemo?null:grade(score),
   answers:answers.map((answer,i)=>({...answer,code:current.questions[i]?.code||'',
-   figure:current.topic==='Algorithmen'&&current.questions[i]?.figure?namespaceAlgoFigure(algoFigure(current.questions[i].figure),'pdf-'+i):''}))
+   figure:isMixedQuestionTask(current)&&current.questions[i]?.figure?namespaceAlgoFigure(algoFigure(current.questions[i].figure),'pdf-'+i):''}))
  }));
  document.getElementById('pdfNotice').innerHTML=current.isDemo?'<strong>Probiere den Download aus:</strong> Speichere deine PDF und öffne sie zur Kontrolle.':'<strong>Ergebnis abgeben:</strong> Lade dein Testergebnis als PDF herunter, speichere die Datei und gib sie bei deiner Lehrkraft ab.';
  document.getElementById('downloadTestPdf').hidden=false;

@@ -227,3 +227,14 @@ Validierung: vollständige Browserprüfung aller 15 Module, dreizehn Testfälle 
 Unterfällen für Navigation, sämtliche Übungen und Tests, Quellen- und Buchaufgaben,
 Druckschaltflächen und PDF-Erzeugung; zusätzlicher Datenvergleich der bisherigen
 Aufgaben, SHA-256-Prüfung der Buchfotos und visuelle Kontrolle der Abbildungen.
+
+
+## Ergänzung: Das Binärsystem (neue Fotos, 0.48)
+
+Die im Chat bereitgestellten drei Buchfotos zeigen die Abschnitte „Das
+Binärsystem“, „Stellenwerttafeln“ und „Umrechnung“ sowie M1 (Lampen) und M2
+(Zähltafel). Genutzt werden die fachlichen Beispiele 3417, 110010001₂, die
+Division 28 : 2, Stellenwerte bis 256, Lampen zu 0/1 und die Zähltafel bis 63.
+Abbildungen wurden eigenständig als SVG neu gezeichnet. Die Webseite benötigt
+die Fotos nicht und verweist die Lernenden nicht auf das Buch. Erweiterte
+Bits-/Bytes-Themen außerhalb dieser Fotos sind noch nicht ergänzt.

@@ -200,3 +200,10 @@ button.secondary,.secondary{background:#e4effa;color:var(--school-navy)}button.s
 @media print{body,body.mode-learn,body.mode-practice,body.mode-test{background:white}.lesson-start-steps{display:none}}
 
 .crumb{background:#e4effa;color:#163b63}.crumb:hover{background:#d0e3f5}
+
+.binary-figure{max-width:760px;margin:18px auto}.binary-figure svg{display:block;width:100%;height:auto;max-height:600px}.binary-figure figcaption{font-size:.95rem;line-height:1.6;color:#345776}
+@media print{.binary-figure{break-inside:avoid}.binary-figure svg{max-height:150mm}}
+
+.binary-lamp-buttons{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}.binary-lamp-buttons button{padding:8px 4px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px}.binary-lamp-buttons svg{width:36px;height:48px;fill:#dce5ed;stroke:#163b63;stroke-width:2}.binary-lamp-buttons button[aria-pressed="true"]{background:#fff0cc;outline:2px solid #ba631b}.binary-lamp-buttons button[aria-pressed="true"] svg{fill:#ffcf66}.lamp-state{font-size:.8rem}.lamp-readout{font-weight:700}@media(max-width:600px){.binary-lamp-buttons{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.binary-lamp-print{display:none}@media print{.binary-lamp-print{display:block}}

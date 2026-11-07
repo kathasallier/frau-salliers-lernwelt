@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.47
+# Frau Salliers Lernwelt – Version 0.48
 
 Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Hardware und
 Software (Klasse 5), Binärsystem und Algorithmen (Klasse 6). Weitere Bereiche
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.47.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.48.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.47.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.48.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -82,7 +82,7 @@ vorgeschaltete Übungen. Er bleibt mit 20 geschlossenen Fragen automatisch
 kontrollierbar. Sieben Testfragen wurden passend zum verbleibenden Lernstoff
 ersetzt. Hardware und Binärsystem behalten ihre bisherigen Abläufe.
 
-21 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
+23 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
 zusätzlich denselben Stand als exportierte Einzeldatei ohne Netzwerk.
 
 Seit 0.43 zeigt Lernwelt 1, Folie 6 nur das Eierbild; die zusätzliche Grafik
@@ -171,5 +171,43 @@ Umgebung wegen der Netzwerkfreigabe nicht abrufbar. Deshalb wurden keine
 exakten offiziellen Farbwerte behauptet und kein Schullogo nachgebildet oder
 übernommen. Für das Original-Logo ist eine zugängliche Originaldatei nötig.
 
-21 Browserregressionen prüfen zusätzlich Einstieg, Anleitung, erforderliche
+23 Browserregressionen prüfen zusätzlich Einstieg, Anleitung, erforderliche
 Antworten, unmittelbare Rückmeldung und Zurücknavigation in allen Lernmodulen.
+
+
+## Klasse 6: Binärsystem, Bits und Bytes (seit 0.48)
+
+Das bisherige Thema Binärsystem heißt jetzt „Binärsystem, Bits und Bytes“.
+Lernwelt 1 ist „Das Binärsystem“. Sie enthält 22 Lernseiten zu Dezimal- und
+Dualsystem, zwei Zuständen/Bit, Stellenwerten, Lampen, Byte, führenden Nullen,
+Wertebereich sowie Umrechnung mit Stellenwerten und wiederholter Division.
+Titelfolie, Anleitung und sofortige verpflichtende Zwischenfragen verwenden die
+vorhandene gemeinsame Lernmechanik. Die Inhalte sind ohne das Lehrbuch nutzbar.
+
+Eigene SVG-Abbildungen orientieren sich fachlich an den bereitgestellten Fotos:
+dezimale Stellenwerttafel (3417), binäre Tafel (110010001₂ = 401), Lampenreihen,
+vollständige Division 28 : 2 mit Leserichtung und Zähltafel bis 63. Die
+neunstellige Beispielzahl wird ausdrücklich vom acht Bit großen Byte unterschieden.
+Ein Byte stellt hier die ganzen Zahlen von 0 bis 255 dar; es gibt 256 Bitfolgen.
+Eine weiterführende Lernwelt zu Bits/Bytes wird ohne weitere Unterlagen nicht
+vorweggenommen.
+
+Drei Merkteile mit Beispielen und Zeichenaufträgen sind im Heft und als PDF
+nutzbar. Übung 1 hat drei Teile mit insgesamt 12 unterschiedlichen Aufgaben:
+Auswahl, Zuordnung, Reihenfolge, Zahlen-/Binäreingaben, vollständige
+Divisionsschritte, offene Erklärungen und selbst schaltbare Lampen. Der
+Lampenzustand wird auch gedruckt. Die Zusammenfassung hat keinen eigenen
+Merkteil. Die Testvorbereitung bietet weitere 12 Aufgaben mit Rückmeldungen.
+Der Abschlusstest enthält 20 geschlossene automatisch kontrollierte Aufgaben.
+Testzugangscode und bestehende IDs bleiben erhalten; die Ergebnis-PDF enthält
+auch die neuen Abbildungen. Für das Thema sind zwei zusätzliche Module
+(Zusammenfassung und Testvorbereitung) registriert.
+
+`assets/binary-world.js` enthält die fachlichen Daten und Registrierung;
+`assets/binary-figures.js` die Abbildungen und Lampenbedienung. Gemeinsame
+Aufgaben-/Druckmechanik wird gezielt für diese Binärmodule wiederverwendet.
+Die Daten der anderen Themen wurden mit dem vorherigen Stand verglichen und
+sind unverändert. Funktionstests prüfen alle Themen einschließlich Navigation,
+Zwischenfragen, Merkteilen, Übungen, Bewertung, Druck und Ergebnis-Downloads.
+Zusätzliche Prüfungen kontrollieren Abbildungsgrenzen, Division und
+Binäreingaben sowie die Lampenbedienung auf schmalen Bildschirmen.

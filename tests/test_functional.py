@@ -75,8 +75,8 @@ class LearningWorldTests(unittest.TestCase):
 
     def open(self, task_id):
         self.catalog(task_id)
-        if task_id == 'algo-test':
-            code=self.page.evaluate('TEST_CODES["algo-test"]')
+        if task_id.endswith('-test'):
+            code=self.page.evaluate('(id)=>TEST_CODES[id]',task_id)
             self.page.once('dialog',lambda d:d.accept(code))
         self.page.locator(f'[data-task="{task_id}"]').click()
         if self.page.evaluate("current?.mode==='Lernen'"):
@@ -86,7 +86,10 @@ class LearningWorldTests(unittest.TestCase):
     def answer_questions(self, questions, prefix='q'):
         for i, question in enumerate(questions):
             field = self.page.locator(f'#{prefix}{i}')
-            if question.get('parts'):
+            if question.get('kind')=='lamps':
+                for j,bit in enumerate(question['a']):
+                    if bit=='1':self.page.locator(f'[data-lamp-for="{prefix}{i}"] [data-lamp-index="{j}"]').click()
+            elif question.get('parts'):
                 for j, part in enumerate(question['parts']):
                     partfield = self.page.locator(f'#{prefix}{i}-part{j}')
                     if part.get('choices'):
@@ -122,7 +125,7 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_navigation_all_modules_and_empty_grades(self):
         ids = self.page.evaluate('tasks.map(t=>t.id)')
-        self.assertEqual(len(ids), 13)
+        self.assertEqual(len(ids), 15)
         for task_id in ids:
             with self.subTest(module=task_id):
                 self.catalog(task_id)
@@ -135,7 +138,7 @@ class LearningWorldTests(unittest.TestCase):
         self.assertEqual(self.page.locator('[data-topic]').get_attribute('data-topic'), 'Hardware und Software')
         self.page.locator('[data-crumb="1"]').click()
         self.page.locator('[data-grade="6"]').click()
-        self.assertEqual(set(self.page.locator('[data-topic]').evaluate_all('(nodes)=>nodes.map(n=>n.dataset.topic)')), {'Algorithmen', 'Binärsystem'})
+        self.assertEqual(set(self.page.locator('[data-topic]').evaluate_all('(nodes)=>nodes.map(n=>n.dataset.topic)')), {'Algorithmen', 'Binärsystem, Bits und Bytes'})
         for grade in range(7, 11):
             self.page.locator('[data-crumb="1"]').click()
             self.assertEqual(self.page.locator('[data-crumb]').count(), 2)
@@ -156,7 +159,7 @@ class LearningWorldTests(unittest.TestCase):
                 self.open(task_id)
                 slides = self.page.evaluate('current.slides')
                 practice_id = self.page.evaluate('current.practiceId')
-                if task_id == 'algo-summary':
+                if task_id in ['algo-summary','binary-summary']:
                     self.assertEqual(self.page.locator('#printNotebook').count(), 0)
                 else:
                     self.page.evaluate('window.print=()=>{}')
@@ -171,7 +174,7 @@ class LearningWorldTests(unittest.TestCase):
                 self.assertFalse(self.page.locator('#lessonPrev').is_disabled())
                 for i, slide in enumerate(slides):
                     self.assertEqual(self.page.locator('#lessonContent h1').inner_text(), slide['title'])
-                    if task_id.startswith('algo-'):
+                    if task_id.startswith(('algo-','binary-')):
                         import re
                         self.assertIsNone(re.search(r'Bubble|Insertion|lineare Suche|Suchen und Sortieren',self.page.locator('#lesson').inner_text(),re.I))
                     if slide.get('visual') or slide.get('images'):
@@ -198,14 +201,14 @@ class LearningWorldTests(unittest.TestCase):
                 self.open(task_id)
                 pages = self.page.evaluate('current.pages')
                 for i, questions in enumerate(pages):
-                    if task_id.startswith('algo-'):
+                    if task_id.startswith(('algo-','binary-')):
                         self.assertNotRegex(self.page.locator('#work').inner_text(),r'(?i)(?:ohne|keine)\s+Punkte|\d+\s*/\s*\d+\s+Punkte')
                     self.answer_questions(questions)
                     self.page.locator('#finish').click()
                     self.assertTrue(self.page.locator('#results').is_visible())
                     self.assert_result_print()
                     graded = sum(not q.get('free') for q in questions)
-                    if task_id.startswith('algo-'):
+                    if task_id.startswith(('algo-','binary-')):
                         self.assertNotRegex(self.page.locator('#resultBody').inner_text(),r'(?i)(?:ohne|keine)\s+Punkte|\d+\s*/\s*\d+\s+Punkte')
                         self.assertEqual(self.page.locator('#resultBody .score').count(),0)
                         self.assertIn('selbst vergleichen',self.page.locator('#resultBody').inner_text())
@@ -214,7 +217,7 @@ class LearningWorldTests(unittest.TestCase):
                     if i < len(pages) - 1:
                         self.page.locator('#nextLevel').click()
                 maximum = sum(not q.get('free') for page in pages for q in page)
-                if not task_id.startswith('algo-'):
+                if not task_id.startswith(('algo-','binary-')):
                     self.assertIn(f'{maximum} / {maximum} Punkte', self.page.locator('#resultBody').inner_text())
                 self.assertEqual(self.page.locator('#nextLevel').count(), 0)
                 self.page.locator('#again').click()
@@ -304,13 +307,14 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_wrong_incomplete_answers_and_state_switch(self):
         self.open('binary-practice')
-        self.page.locator('#q0').fill('999')
+        self.page.locator('#q0').select_option('102101')
         self.page.once('dialog', lambda d: d.dismiss())
         self.page.locator('#finish').click()
         self.assertTrue(self.page.locator('#work').is_visible())
         self.page.once('dialog', lambda d: d.accept())
         self.page.locator('#finish').click()
-        self.assertIn('0 / 10 Punkte', self.page.locator('#resultBody').inner_text())
+        self.assertEqual(self.page.locator('#resultBody .score').count(),0)
+        self.assertTrue(self.page.locator('#resultBody .bad').count()>0)
         self.open('hardware-practice')
         self.assertIsNone(self.page.evaluate('practiceState'))
         self.assertEqual(self.page.locator('#nextLevel').count(), 0)
@@ -670,7 +674,7 @@ class LearningWorldTests(unittest.TestCase):
                 self.assertGreater(len(pdf),1)
                 for i,page in enumerate(pdf):
                     self.assertIn(f'Seite {i+1} / {len(pdf)}',page.get_text())
-                if task_id=='algo-test':self.assertTrue(any(page.get_images() for page in pdf))
+                if task_id in ['algo-test','binary-test']:self.assertTrue(any(page.get_images() for page in pdf))
                 self.assertEqual(self.page.evaluate('window.printCalls||0'),before)
                 self.page.wait_for_function("document.getElementById('downloadTestPdf').disabled===false")
                 with self.page.expect_download():self.page.locator('#downloadTestPdf').click()
@@ -768,6 +772,65 @@ class LearningWorldTests(unittest.TestCase):
         colors=self.page.evaluate("({button:getComputedStyle(document.getElementById('startTryTest')).backgroundColor,body:getComputedStyle(document.body).backgroundImage})")
         self.assertEqual(colors['button'],'rgb(22, 59, 99)')
         self.assertIn('224, 237, 249',colors['body'])
+
+    def test_binary_world_book_examples_lamps_and_input(self):
+        data=self.page.evaluate('''()=>({slides:binarySlides,notes:notebookEntries['binary-learn'],positions:notebookPositions['binary-learn'],practice:BINARY_PRACTICE,prep:BINARY_PREPARATION,test:BINARY_TEST})''')
+        self.assertEqual(len(data['slides']),22)
+        self.assertEqual(len(data['notes']),3)
+        self.assertEqual([len(p) for p in data['practice']],[4,4,4])
+        self.assertEqual([len(p) for p in data['prep']],[4,4,4])
+        self.assertEqual(len(data['test']),20)
+        self.assertFalse(any(q.get('free') for q in data['test']))
+        self.assertTrue(all(q.get('choices') or q.get('order') or q.get('parts') for q in data['test']))
+        self.assertTrue(self.page.evaluate("algoCorrect({kind:'binary',a:'1101'},'0000 1101₂')"))
+        self.assertFalse(self.page.evaluate("algoCorrect({kind:'binary',a:'1101',width:8},'1101')"))
+        self.assertFalse(self.page.evaluate("algoCorrect({kind:'binary',a:'1101'},'1201')"))
+        self.assertTrue(self.page.evaluate("algoCorrect({kind:'binary',a:'101001',width:6},'1,0,1,0,0,1')"))
+        self.open('binary-learn')
+        self.assertEqual(self.page.evaluate('current.topic'),'Binärsystem, Bits und Bytes')
+        self.page.evaluate('lessonPage=4;renderLesson()')
+        self.assertIn('401',self.page.locator('.illustration').inner_text())
+        self.page.evaluate('lessonPage=14;renderLesson()')
+        text=self.page.locator('.illustration').inner_text()
+        self.assertIn('28 : 2',text);self.assertIn('unten nach oben',text)
+        self.page.evaluate('lessonPage=20;renderLesson()')
+        self.assertEqual(self.page.locator('.binary-figure').get_attribute('data-binary-kind'),'counting')
+        for position in data['positions']:
+            self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',position)
+            self.assertEqual(self.page.locator('.notebook-card').count(),1)
+        self.open('binary-practice')
+        for stage in range(2):
+            self.answer_questions(self.page.evaluate('current.pages[practiceState.page]'))
+            self.page.locator('#finish').click();self.page.locator('#nextLevel').click()
+        self.assertEqual(self.page.locator('#q0').input_value(),'')
+        self.page.set_viewport_size({'width':390,'height':844})
+        self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        panel=self.page.locator('[data-lamp-for="q0"]')
+        for j in [2,3,5,6]:panel.locator(f'[data-lamp-index="{j}"]').click()
+        self.assertEqual(self.page.locator('#q0').input_value(),'00110110')
+        self.assertIn('Summe: 54',panel.inner_text())
+        self.assertEqual(panel.locator('[aria-pressed="true"]').count(),4)
+        self.page.evaluate('window.print=()=>{}');self.page.locator('#printAlgoWork').click()
+        self.assertEqual(self.page.locator('[data-algo-print-for="q0"]').text_content(),'00110110')
+        self.page.emulate_media(media='print')
+        self.assertTrue(self.page.locator('[data-lamp-print="q0"] svg').is_visible())
+        self.assertFalse(panel.is_visible())
+        self.assert_pdf(self.page)
+
+    def test_binary_figures_fit_and_division_is_correct(self):
+        self.open('binary-learn')
+        slides=self.page.evaluate('current.slides')
+        for i,slide in enumerate(slides):
+            if not slide.get('binaryFigure'):continue
+            self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',i)
+            svg=self.page.locator('.illustration svg')
+            for width in [1100,390]:
+                self.page.set_viewport_size({'width':width,'height':844})
+                outside=svg.evaluate('''svg=>{const v=svg.viewBox.baseVal;return [...svg.querySelectorAll('text')].filter(t=>{const b=t.getBBox();return b.x<0||b.y<0||b.x+b.width>v.width+1||b.y+b.height>v.height+1}).map(t=>t.textContent)}''')
+                self.assertEqual(outside,[],slide['title'])
+                self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        rows=self.page.evaluate('''()=>{const html=renderBinaryFigure({binaryKind:'division',value:28},'check-division');const d=document.createElement('div');d.innerHTML=html;return [...d.querySelectorAll('text')].map(t=>t.textContent)}''')
+        self.assertEqual(rows[3:18],['28 : 2','14','0','14 : 2','7','0','7 : 2','3','1','3 : 2','1','1','1 : 2','0','1'])
 
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})

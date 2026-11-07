@@ -57,7 +57,7 @@ function printTest(id){
  const qs=t?.questions;
  if(!qs){alert('Für diesen Test sind keine Druckaufgaben vorhanden.');return}
  const esc=escapeHTML;
- const questions=qs.map((q,i)=>`<article class="item"><div class="question-title"><b>${i+1}.</b> ${esc(q.q)} <span class="pts"><span class="points-blank"></span> / 1 P</span></div>${t.id==='algo-test'?renderAlgoPrintBody(q):q.choices?`<div class="options">${q.choices.map((c,j)=>`<span>□ ${esc(c)}</span>`).join('')}</div>`:`<div class="answer-space"></div>`}</article>`).join('');
+ const questions=qs.map((q,i)=>`<article class="item"><div class="question-title"><b>${i+1}.</b> ${esc(q.q)} <span class="pts"><span class="points-blank"></span> / 1 P</span></div>${isMixedQuestionTask(t)?renderAlgoPrintBody(q):q.choices?`<div class="options">${q.choices.map((c,j)=>`<span>□ ${esc(c)}</span>`).join('')}</div>`:`<div class="answer-space"></div>`}</article>`).join('');
  const page=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${esc(t.title)} – Druckversion</title><style>
  .algo-print-figure svg{display:block;width:100%;height:auto;max-height:165mm}.algo-print-figure figcaption{font-size:9pt;line-height:1.5}.algo-print-figure details{display:none}
  @page{size:A4 portrait;margin:20mm 20mm 20mm 20mm}
@@ -92,11 +92,12 @@ function start(id){
  }
  resetActivityState();
  current=requested;
- if(current.id==='algo-test'){algoPhase='test';renderAlgoWork();show('work');return true}
+ if(current.id==='algo-test'||current.id==='binary-test'){algoPhase='test';renderAlgoWork();show('work');return true}
  activityModes[current.mode].start();
  return true;
 }
 function illustrate(slide){
+ if(current.binaryUnit&&slide.binaryFigure)return renderBinaryFigure(slide.binaryFigure,'lesson-binary-'+lessonPage);
  const figure=current.id==='algo-general-learn'&&slide.title==='Ausführbarkeit: sinnvolle Schritte'?'':renderFigure(current.id,slide);
  const photos=current.id==='algo-general-learn'?{
   'Anweisungen in richtiger Reihenfolge':['tea','Tasse Tee und Wasserkocher als Beispiel für einen Alltagsablauf'],
@@ -116,7 +117,7 @@ function notebookId(){return current.id}
 function structuredNote(text){return escapeHTML(text).split('\n').map(line=>{const m=line.match(/^([^:]{3,52}):\s*(.+)$/);return m?`<p class="note-line"><strong class="note-term">${m[1]}:</strong> ${m[2]}</p>`:`<p class="note-line">${line}</p>`}).join('')}
 function notebookDrawing(entry,scope){
  if(!entry.drawing)return '';
- return `<div class="notebook-drawing"><h4>Zeichne ins Heft</h4><p>${escapeHTML(entry.drawing)}</p>${(entry.diagrams||[]).map((title,i)=>namespaceAlgoFigure(renderFigure('algo-display-learn',{title}),scope+'-'+i)).join('')}<div class="notebook-draw-space" aria-hidden="true"></div></div>`;
+ return `<div class="notebook-drawing"><h4>Zeichne ins Heft</h4><p>${escapeHTML(entry.drawing)}</p>${entry.binaryDiagram?renderBinaryFigure(entry.binaryDiagram,scope):''}${(entry.diagrams||[]).map((title,i)=>namespaceAlgoFigure(renderFigure('algo-display-learn',{title}),scope+'-'+i)).join('')}<div class="notebook-draw-space" aria-hidden="true"></div></div>`;
 }
 function notebookCard(){const positions=notebookPositions[notebookId()]||[];const index=positions.indexOf(lessonPage);if(index<0)return '';const e=notebookEntries[notebookId()][index];return `<div class="notebook-card"><h3>📒 Heftereintrag ${index+1}: ${escapeHTML(e.title)}</h3><div class="notebook-text">${structuredNote(e.text)}</div>${notebookDrawing(e,'note-screen-'+current.id+'-'+index)}<p class="notebook-hint">Schreibe die Überschrift auf. Unterstreiche die fett markierten Fachbegriffe und übernimm die Erklärungen und Beispiele.</p></div>`}
 function printNotebook(){const entries=notebookEntries[notebookId()]||[];if(!entries.length)return;$('notebookPrint').innerHTML=`<div class="print-kicker">FRAU SALLIERS LERNWELT · MERKBLATT</div><h1>${escapeHTML(current.topic)}</h1><div class="print-meta"><span>Name: _________________________</span><span>Klasse: ______</span><span>Datum: __________</span></div><p class="print-intro">Die wichtigsten Merkteile zum Lernen und Nachschlagen.</p>${entries.map((e,i)=>`<section class="print-task"><h2><span class="print-number">${i+1}</span> ${escapeHTML(e.title)}</h2><div class="print-memory"><strong>Wichtige Begriffe und Beispiele</strong><div>${structuredNote(e.text)}</div></div>${notebookDrawing(e,'note-print-'+current.id+'-'+i)}</section>`).join('')}`;document.body.classList.add('print-notebook');window.print()}
@@ -135,7 +136,7 @@ $('printNotebook')?.addEventListener('click',printNotebook);$('lessonPrev').disa
 function feedback(slide,choice){return choice===slide.answer?`<p class="good"><strong>✓ Richtig!</strong> ${escapeHTML(slide.why)}</p>`:`<p class="bad"><strong>Noch nicht ganz.</strong> ${escapeHTML(slide.hint)} Versuche es noch einmal.</p>`}
 let algoOrderSelections={};
 function renderWork(){
- if(current.topic==='Algorithmen')return renderAlgoWork();
+ if(isMixedQuestionTask(current))return renderAlgoWork();
  const isPractice=!!practiceState;
  // Reihenfolge-Auswahl wird je Aufgabenansicht neu aufgebaut.
  algoOrderSelections={};
@@ -169,7 +170,7 @@ function normalize(s){return String(s).trim().replace(/\s+/g,'').replace(/^0+(?=
  if(current)activityEngines[current.engine].finish();
 }
 function finishQuestions(){
- if(current.topic==='Algorithmen')return finishAlgoActivity();
+ if(isMixedQuestionTask(current))return finishAlgoActivity();
  if(practiceState){finishPractice();return}
  const name=$('student').value.trim();if(!name){alert('Bitte gib zuerst deinen Namen ein.');$('student').focus();return}
  const answers=evaluate(current.questions);if(answers.some(a=>!a.given)&&!confirm('Einige Antworten fehlen. Trotzdem abgeben?'))return;

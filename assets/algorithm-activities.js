@@ -15,6 +15,7 @@ const algoPreparationGoals=[
 function algoText(value){return String(value).normalize('NFC').trim().toLocaleLowerCase('de-DE').replace(/\s+/g,' ').replace(/[.!?]+$/,'')}
 function algoNumbers(value){const text=String(value).replace(/[\[\]]/g,'').trim();return text?text.split(/[\s,;]+/).map(Number):[]}
 function algoCorrect(q,value){
+ if(q.kind==='binary'||q.kind==='lamps'){const v=value.replace(/[\s,;]/g,'').replace(/₂$/,'');return /^[01]+$/.test(v)&&(!q.width||v.length===q.width)&&v.replace(/^0+(?=.)/,'')===q.a.replace(/^0+(?=.)/,'')}
  if(q.kind==='list')return JSON.stringify(algoNumbers(value))===JSON.stringify(algoNumbers(q.a));
  if(q.kind==='number')return /^[+-]?\d+$/.test(value.trim())&&Number(value)===Number(q.a);
  if(q.order||q.choices)return value===q.a;
@@ -22,6 +23,7 @@ function algoCorrect(q,value){
 }
 function algoFigure(figure){
  if(!figure)return '';
+ if(figure.binaryKind)return renderBinaryFigure(figure);
  if(figure==='teeth')return renderActionDiagram(sourceTeethSteps,'algo-teeth');
  if(figure==='maze')return renderPracticeMaze();
  if(figure==='escape')return renderPracticePlan();
@@ -33,9 +35,10 @@ function algoFigure(figure){
 }
 function algoPrintValue(id){return `<div class="algo-print-value" data-algo-print-for="${id}"></div>`}
 function algoField(q,id,label){
+ if(q.kind==='lamps')return renderBinaryLampField(q,id);
  if(q.choices)return `<select id="${id}" aria-label="${escapeHTML(label)}"><option value="">Bitte auswählen</option>${q.choices.map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('')}</select>${algoPrintValue(id)}`;
  if(q.free)return `<textarea id="${id}" rows="5" maxlength="2500" aria-label="${escapeHTML(label)}" placeholder="Deine eigene Lösung"></textarea>${algoPrintValue(id)}`;
- return `<input id="${id}" type="text" ${q.kind==='number'?'inputmode="numeric"':''} autocomplete="off" aria-label="${escapeHTML(label)}" placeholder="${q.kind==='list'?'Zum Beispiel: 2, 1, 3':'Deine Antwort'}">${algoPrintValue(id)}`;
+ return `<input id="${id}" type="text" ${q.kind==='number'||q.kind==='binary'?'inputmode="numeric"':''} autocomplete="off" aria-label="${escapeHTML(label)}" placeholder="${q.kind==='list'?'Zum Beispiel: 2, 1, 3':q.kind==='binary'?'Folge aus 0 und 1':'Deine Antwort'}">${algoPrintValue(id)}`;
 }
 // Marker und Beschriftungen bleiben auch neben einer ausgeblendeten Lernseite eindeutig.
 function namespaceAlgoFigure(html,scope){
@@ -61,9 +64,10 @@ function renderAlgoWork(){
  $('workHead').innerHTML=`<h1>${escapeHTML(heading)}</h1><p>Informatik · Klasse ${selectedGrade||6} · ${algoPhase==='preparation'?'Vorbereitung':current.mode}</p>`+
  (practiceState?`<div class="levelbar">${algoPageTitles[current.id].map((title,i)=>`<span class="levelpill ${i===stage?'active':i<stage?'done':''}">${i+1}. ${escapeHTML(title)}</span>`).join('')}</div><h2>Teil ${stage+1} von ${current.pages.length}: ${escapeHTML(algoPageTitles[current.id][stage])}</h2>`:'')+
  (algoPhase==='test'?'<p class="notice">20 unterschiedliche Aufgaben · 20 Punkte. Wähle Antworten, ordne zu oder lege eine Reihenfolge; es gibt keine offenen Texteingaben. Bei einer Zuordnung müssen alle Teilantworten stimmen. Lösungen und Note erscheinen nach der Abgabe.</p><label for="student">Dein Name</label><input id="student" maxlength="80" autocomplete="off">':'<p>Ordne, untersuche, rechne und formuliere selbst. Geschlossene Aufgaben werden geprüft. Wichtig: Eigene Texte und Pläne werden nicht inhaltlich automatisch bewertet. Vergleiche sie nach der Abgabe selbst mit Beispiel und Prüffragen.</p>')+
- (current.id==='algo-review-practice'?`<p class="notice preparation-goal">${escapeHTML(algoPreparationGoals[stage])}</p>`:'')+
+ (current.id==='algo-review-practice'||current.id==='binary-preparation'?`<p class="notice preparation-goal">${escapeHTML(current.binaryUnit?BINARY_GOALS[stage]:algoPreparationGoals[stage])}</p>`:'')+
  `<div class="actions no-print"><button type="button" id="printAlgoWork" class="secondary">Aufgaben und eigene Antworten drucken / als PDF</button>${algoPhase==='preparation'?'<button type="button" id="beginAlgoTest">Zum Test · Zugangscode eingeben</button>':''}</div>`;
  $('questions').innerHTML=questions.map(algoQuestionHTML).join('');
+ if(current.binaryUnit)bindBinaryLampInputs();
  document.querySelectorAll('[data-order-q]').forEach(button=>button.addEventListener('click',()=>{
   const i=Number(button.dataset.orderQ),choice=Number(button.dataset.orderV);const selected=algoOrderSelections[i]||=[];
   if(selected.includes(choice))return;selected.push(choice);button.disabled=true;
@@ -88,7 +92,7 @@ function beginAlgoTest(){
 }
 function startAlgoPreparation(){return start('algo-review-practice')}
 function updateAlgoPrint(){
- if(current?.topic!=='Algorithmen')return;
+ if(!isMixedQuestionTask(current))return;
  document.querySelectorAll('[data-algo-print-for]').forEach(el=>{el.textContent=$(el.dataset.algoPrintFor)?.value.trim()||'Noch nicht beantwortet.'});
 }
 window.addEventListener('beforeprint',updateAlgoPrint);

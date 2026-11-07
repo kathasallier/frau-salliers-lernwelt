@@ -1,5 +1,21 @@
 # Änderungen
 
+## 0.48 – Lernwelt 1 im Thema Binärsystem, Bits und Bytes
+
+- Klasse-6-Thema umbenannt, Lernwelt 1 anhand der neuen Buchfotos überarbeitet:
+  22 Lernseiten, Stellenwerttafeln, Lampen, zwei Umrechnungswege, Bit/Byte,
+  führende Nullen, Zähltafel und Wertebereich.
+- Drei Merkteile mit vollständigen Beispielen und Zeichenaufträgen.
+- Übung 1 mit 12 gemischten Aufgaben und interaktiv schaltbaren Lampen;
+  Zusammenfassung, Testvorbereitung mit 12 weiteren Aufgaben und 20 geschlossene
+  Testfragen. Bisheriger Testcode und Modul-IDs bleiben erhalten.
+- Neue eigene SVG-Abbildungen statt Abhängigkeit von Buchseiten. Druck und
+  Ergebnis-PDFs enthalten die zugehörigen Binärabbildungen.
+- Andere Themen, deren Inhalte und Codes unverändert. Gemeinsame Mechanik
+  um gezielte Unterstützung der Binärmodule erweitert.
+- 23 Funktionstests einschließlich Abbildungs-/Rechenprüfung, Lampen,
+  vollständiger Navigation, aller Übungen und PDF-Downloads; auch offline.
+
 ## 0.47 – Titelfolien, Anleitung und unmittelbare Rückmeldung
 
 - Lernmodule beginnen mit Titel und dreischrittiger Anleitung. Bestehende
