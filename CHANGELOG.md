@@ -1,5 +1,18 @@
 # Änderungen
 
+## 0.47 – Titelfolien, Anleitung und unmittelbare Rückmeldung
+
+- Lernmodule beginnen mit Titel und dreischrittiger Anleitung. Bestehende
+  Lernseitennummern und Merkteile bleiben erhalten.
+- Zwischenfragen sperren Weiter bis zur Antwort. Auswahl zeigt unmittelbar
+  die Rückmeldung; Bestätigungsknopf entfällt. Antworten bleiben beim
+  Zurückblättern erhalten und können geändert werden.
+- Blaues Grundthema mit Dunkelblau und Orange, auch für die Urkunden-PDF.
+- Original-Schulportal durch Netzwerkfreigabe blockiert; kein Schullogo
+  erfunden oder ungeprüft übernommen.
+- 21 Funktionstests einschließlich aller Module, Übungen, Downloads,
+  Druck/PDF, Mobilansicht und vollständiger Offline-Einzeldatei.
+
 ## 0.46 – Urkunden-PDF und Übungstest auf der Startseite
 
 - PDF-Download oben auf der Auswertungsseite, vor Hinweis und Aufgaben.

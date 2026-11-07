@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.46
+# Frau Salliers Lernwelt – Version 0.47
 
 Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Hardware und
 Software (Klasse 5), Binärsystem und Algorithmen (Klasse 6). Weitere Bereiche
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.46.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.47.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.46.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.47.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -82,7 +82,7 @@ vorgeschaltete Übungen. Er bleibt mit 20 geschlossenen Fragen automatisch
 kontrollierbar. Sieben Testfragen wurden passend zum verbleibenden Lernstoff
 ersetzt. Hardware und Binärsystem behalten ihre bisherigen Abläufe.
 
-20 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
+21 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
 zusätzlich denselben Stand als exportierte Einzeldatei ohne Netzwerk.
 
 Seit 0.43 zeigt Lernwelt 1, Folie 6 nur das Eierbild; die zusätzliche Grafik
@@ -149,3 +149,27 @@ gekennzeichnet. Danach führt die Navigation wieder auf die Startseite.
 und PDF-Erzeugung. Ein zusätzlicher Browsertest prüft Startseite/Code, Eingaben,
 Namenspflicht, unvollständige Abgabe, Auswertung ohne Note, echten PDF-Download,
 Urkunde auf Seite 1, Aufgaben ab Seite 2, mobile Ansicht, Druck und Neustart.
+
+
+## Lernwelt-Einstieg und Gestaltung seit 0.47
+
+Jedes Lernmodul beginnt mit einer Titelfolie und einer Anleitung: Folien lesen,
+Zwischenfragen beantworten, danach die passende Übung bearbeiten. Diese beiden
+Einstiegsseiten sind vom bisherigen Inhaltszähler getrennt; Lernseiten und
+Merkteilpositionen behalten ihre Nummern. Zurück/Weiter funktioniert auch über
+diese Einstiegsseiten. Ein neuer Modulstart setzt den Lernzustand zurück.
+
+Zwischenfragen müssen beantwortet werden, bevor Weiter möglich ist. Schon die
+Auswahl einer Antwort zeigt die Rückmeldung; es gibt keinen Bestätigungsknopf.
+Auch eine falsche Antwort gilt als beantwortet; sie kann unmittelbar geändert
+werden. Antworten und Rückmeldungen bleiben beim Zurückblättern sichtbar.
+
+Die Oberfläche verwendet Blau als Grundlage, Dunkelblau für tragende Elemente
+und Orange als Akzent. Die PDF-Urkunde greift diese Palette auf. Das vom Nutzer
+verlinkte Schulportal https://www.sks-burgbreite.bildung-lsa.de/ war in der
+Umgebung wegen der Netzwerkfreigabe nicht abrufbar. Deshalb wurden keine
+exakten offiziellen Farbwerte behauptet und kein Schullogo nachgebildet oder
+übernommen. Für das Original-Logo ist eine zugängliche Originaldatei nötig.
+
+21 Browserregressionen prüfen zusätzlich Einstieg, Anleitung, erforderliche
+Antworten, unmittelbare Rückmeldung und Zurücknavigation in allen Lernmodulen.

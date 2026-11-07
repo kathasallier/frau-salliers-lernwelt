@@ -79,6 +79,9 @@ class LearningWorldTests(unittest.TestCase):
             code=self.page.evaluate('TEST_CODES["algo-test"]')
             self.page.once('dialog',lambda d:d.accept(code))
         self.page.locator(f'[data-task="{task_id}"]').click()
+        if self.page.evaluate("current?.mode==='Lernen'"):
+            self.page.locator('#lessonNext').click()
+            self.page.locator('#lessonNext').click()
 
     def answer_questions(self, questions, prefix='q'):
         for i, question in enumerate(questions):
@@ -165,7 +168,7 @@ class LearningWorldTests(unittest.TestCase):
                     self.assert_pdf(self.page)
                     self.page.emulate_media(media='screen')
                     self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
-                self.assertTrue(self.page.locator('#lessonPrev').is_disabled())
+                self.assertFalse(self.page.locator('#lessonPrev').is_disabled())
                 for i, slide in enumerate(slides):
                     self.assertEqual(self.page.locator('#lessonContent h1').inner_text(), slide['title'])
                     if task_id.startswith('algo-'):
@@ -178,10 +181,8 @@ class LearningWorldTests(unittest.TestCase):
                     if slide.get('question'):
                         wrong = (slide['answer'] + 1) % len(slide['choices'])
                         self.page.locator(f'[name="lessonAnswer"][value="{wrong}"]').check()
-                        self.page.locator('#checkAnswer').click()
                         self.assertTrue(self.page.locator('#lessonFeedback .bad').is_visible())
                         self.page.locator(f'[name="lessonAnswer"][value="{slide["answer"]}"]').check()
-                        self.page.locator('#checkAnswer').click()
                         self.assertTrue(self.page.locator('#lessonFeedback .good').is_visible())
                         self.page.locator('#lessonNext').click()
                         self.page.locator('#lessonPrev').click()
@@ -360,6 +361,8 @@ class LearningWorldTests(unittest.TestCase):
                     self.assertEqual(figure.locator('path[d="M427 130V80H160V103"]').count(), 1)
                     self.assertEqual(figure.locator('path[d="M260 165H340"]').count(), 1)
                 if i < len(slides)-1:
+                    if slide.get('question'):
+                        self.page.locator(f'[name="lessonAnswer"][value="{slide["answer"]}"]').check()
                     self.page.locator('#lessonNext').click()
         self.assertEqual(total, 28)
 
@@ -726,10 +729,52 @@ class LearningWorldTests(unittest.TestCase):
         self.page.locator('#back').click()
         self.assertTrue(self.page.locator('#stepSubject').is_visible())
 
+    def test_lesson_title_guide_and_immediate_required_answers(self):
+        ids=self.page.evaluate('tasks.filter(t=>t.mode==="Lernen").map(t=>t.id)')
+        for task_id in ids:
+            self.catalog(task_id)
+            self.page.locator(f'[data-task="{task_id}"]').click()
+            self.assertEqual(self.page.evaluate('lessonStage'),'title')
+            self.assertEqual(self.page.locator('#lessonContent h1').inner_text(),self.page.evaluate('current.title'))
+            self.assertTrue(self.page.locator('#lessonPrev').is_disabled())
+            self.page.locator('#lessonNext').click()
+            self.assertEqual(self.page.evaluate('lessonStage'),'guide')
+            self.assertEqual(self.page.locator('.lesson-guide-list li').count(),3)
+            self.page.locator('#lessonPrev').click()
+            self.assertEqual(self.page.evaluate('lessonStage'),'title')
+            self.page.locator('#lessonNext').click();self.page.locator('#lessonNext').click()
+            self.assertEqual(self.page.evaluate('lessonStage'),'content')
+            self.assertEqual(self.page.evaluate('lessonPage'),0)
+            self.page.locator('#lessonPrev').click()
+            self.assertEqual(self.page.evaluate('lessonStage'),'guide')
+            self.page.locator('#lessonNext').click()
+            q=self.page.evaluate('current.slides.findIndex(s=>s.question)')
+            if q<0:continue
+            self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',q)
+            self.assertTrue(self.page.locator('#lessonNext').is_disabled())
+            self.assertEqual(self.page.locator('#checkAnswer').count(),0)
+            answer=self.page.evaluate('current.slides[lessonPage].answer')
+            count=self.page.evaluate('current.slides[lessonPage].choices.length')
+            self.page.locator(f'[name="lessonAnswer"][value="{(answer+1)%count}"]').check()
+            self.assertTrue(self.page.locator('#lessonFeedback .bad').is_visible())
+            self.assertFalse(self.page.locator('#lessonNext').is_disabled())
+            self.page.locator(f'[name="lessonAnswer"][value="{answer}"]').check()
+            self.assertTrue(self.page.locator('#lessonFeedback .good').is_visible())
+            self.page.locator('#lessonNext').click();self.page.locator('#lessonPrev').click()
+            self.assertTrue(self.page.locator('#lessonFeedback .good').is_visible())
+            self.page.set_viewport_size({'width':390,'height':844})
+            self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+        self.page.reload()
+        colors=self.page.evaluate("({button:getComputedStyle(document.getElementById('startTryTest')).backgroundColor,body:getComputedStyle(document.body).backgroundImage})")
+        self.assertEqual(colors['button'],'rgb(22, 59, 99)')
+        self.assertIn('224, 237, 249',colors['body'])
+
     def test_mobile_grade_display_and_notebook_print_cleanup(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})
         self.catalog('algo-general-learn', grade=6)
         self.page.locator('[data-task="algo-general-learn"]').click()
+        self.page.locator('#lessonNext').click()
+        self.page.locator('#lessonNext').click()
         self.assertIn('Klasse 6', self.page.locator('#lessonContent').text_content())
         self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         self.page.evaluate('window.print=()=>{}')

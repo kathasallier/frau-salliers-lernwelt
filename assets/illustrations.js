@@ -93,7 +93,7 @@ function renderActionDiagram(actions,key='own-sequence'){
 }
 function branchDiagramBody(question,yes,no,next,arrow){
  const wrap=text=>{const words=String(text).match(/\S{1,20}/g)||[];const lines=[''];for(const word of words){const i=lines.length-1;if((lines[i]+' '+word).trim().length>20&&lines[i])lines.push(word);else lines[i]=(lines[i]+' '+word).trim()}return lines};
- const diamond='<polygon data-flow-node="decision" points="260,95 365,165 260,235 155,165" fill="#eeeafa" stroke="#7f639f" stroke-width="2"/>';
+ const diamond='<polygon data-flow-node="decision" points="260,95 365,165 260,235 155,165" fill="#e7f2fb" stroke="#7f639f" stroke-width="2"/>';
  let body=figureOval(185,8,150,'Start')+arrow('M260 58V91')+diamond+figureText(260,159,wrap(question),19)+arrow('M155 165H110V280')+arrow('M365 165H410V280')+figureText(110,145,'Ja',20)+figureText(410,145,'Nein',20)+figurePanel(10,285,200,85,wrap(yes),'#eaf5f1',18)+figurePanel(310,285,200,85,wrap(no),'#eaf5f1',18)+'<path d="M110 370V405H410V370" fill="none" stroke="#43546b" stroke-width="3"/>';
  if(next)body+=arrow('M260 405V435')+figurePanel(130,440,260,65,next)+arrow('M260 505V540')+figureOval(185,545,150,'Ende');
  else body+=arrow('M260 405V440')+figureOval(185,445,150,'Ende');
@@ -101,7 +101,7 @@ function branchDiagramBody(question,yes,no,next,arrow){
 }
 function trafficLoopBody(question,yes,no,arrow){
  const wrap=text=>{const words=String(text).match(/\S{1,18}/g)||[];const lines=[''];for(const w of words){const i=lines.length-1;if((lines[i]+' '+w).trim().length>18&&lines[i])lines.push(w);else lines[i]=(lines[i]+' '+w).trim()}return lines};
- const body=figureOval(85,8,150,'Start')+arrow('M160 58V100')+'<polygon data-flow-node="decision" points="160,105 260,175 160,245 60,175" fill="#eeeafa" stroke="#7f639f" stroke-width="2"/>'+figureText(160,167,wrap(question),18)+arrow('M260 175H340')+figureText(300,155,'Nein',20)+figurePanel(345,140,165,85,wrap(no),'#eaf5f1',18)+arrow('M427 140V80H160V100').replace('<path ','<path data-flow-edge="retry" ')+arrow('M160 245V295')+figureText(192,275,'Ja',20)+figurePanel(55,300,210,85,wrap(yes),'#eaf5f1',18)+arrow('M160 385V430')+figureOval(85,435,150,'Ende');
+ const body=figureOval(85,8,150,'Start')+arrow('M160 58V100')+'<polygon data-flow-node="decision" points="160,105 260,175 160,245 60,175" fill="#e7f2fb" stroke="#7f639f" stroke-width="2"/>'+figureText(160,167,wrap(question),18)+arrow('M260 175H340')+figureText(300,155,'Nein',20)+figurePanel(345,140,165,85,wrap(no),'#eaf5f1',18)+arrow('M427 140V80H160V100').replace('<path ','<path data-flow-edge="retry" ')+arrow('M160 245V295')+figureText(192,275,'Ja',20)+figurePanel(55,300,210,85,wrap(yes),'#eaf5f1',18)+arrow('M160 385V430')+figureOval(85,435,150,'Ende');
  return {body,height:505};
 }
 function renderBranchDiagram(question,yes,no,key='own-branch',retryNo=false){
@@ -122,7 +122,7 @@ function renderFigure(taskId,slide){
    height=spec.steps.length*100+20;
    body=spec.steps.map((label,i)=>{
     const y=10+i*100;
-    return figurePanel(115,y,350,72,spec.icons?['','']:label)+`<circle cx="65" cy="${y+36}" r="23" fill="#e9e5fa"/>`+figureText(65,y+43,i+1)+(spec.icons?figureIcon(spec.icons[i],163,y+36,.6)+figureText(310,y+31-(label.length-1)*5,label):'')+(i<spec.steps.length-1?arrow(`M290 ${y+72}V${y+98}`):'');
+    return figurePanel(115,y,350,72,spec.icons?['','']:label)+`<circle cx="65" cy="${y+36}" r="23" fill="#e1edfa"/>`+figureText(65,y+43,i+1)+(spec.icons?figureIcon(spec.icons[i],163,y+36,.6)+figureText(310,y+31-(label.length-1)*5,label):'')+(i<spec.steps.length-1?arrow(`M290 ${y+72}V${y+98}`):'');
    }).join('');
    break;
   case 'pancakes': {
@@ -140,7 +140,7 @@ function renderFigure(taskId,slide){
    height=400;
    body=figurePanel(90,10,340,65,'Algorithmus')+arrow('M260 75V107')+figurePanel(90,112,340,65,'Programmiersprache')+arrow('M260 177V209')+figurePanel(90,214,340,65,'Programm')+figureText(260,335,'Eingabe → Verarbeitung → Ausgabe',21);break;
   case 'everyday':
-   body=[['recipe','Rezept'],['blocks','Bauanleitung'],['brush','Zähneputzen']].map(([icon,label],i)=>`<rect x="${15+i*170}" y="35" width="150" height="190" rx="20" fill="${['#fff1d6','#eaf5f1','#eeeafa'][i]}"/>`+(i<2?`<image data-learning-image="${i?'building':'pancakes'}" href="${LEARNING_IMAGES[i?'building':'pancakes'].src}" x="${20+i*170}" y="55" width="140" height="100" preserveAspectRatio="xMidYMid meet"/>`:figureIcon(icon,90+i*170,109))+figureText(90+i*170,194,label,17)).join('')+figureText(260,285,'Schritte → Ziel',24);
+   body=[['recipe','Rezept'],['blocks','Bauanleitung'],['brush','Zähneputzen']].map(([icon,label],i)=>`<rect x="${15+i*170}" y="35" width="150" height="190" rx="20" fill="${['#fff1d6','#eaf5f1','#e7f2fb'][i]}"/>`+(i<2?`<image data-learning-image="${i?'building':'pancakes'}" href="${LEARNING_IMAGES[i?'building':'pancakes'].src}" x="${20+i*170}" y="55" width="140" height="100" preserveAspectRatio="xMidYMid meet"/>`:figureIcon(icon,90+i*170,109))+figureText(90+i*170,194,label,17)).join('')+figureText(260,285,'Schritte → Ziel',24);
    break;
   case 'comparison':
    height=300;
@@ -155,7 +155,7 @@ function renderFigure(taskId,slide){
    break;
   case 'finite':
    height=260;
-   body=`<path d="M65 120H450" stroke="#92a3b9" stroke-width="5"/>`+[['Start',65],['Schritte',260],['Ende',450]].map(([label,x],i)=>`<circle cx="${x}" cy="120" r="${i===1?17:26}" fill="${i===2?'#d7eddf':'#e9e5fa'}"/>`+figureText(x,190,label,22)).join('')+figureIcon('flag',450,53,.65)+figureText(260,45,'Ein erreichbarer Endpunkt',23);
+   body=`<path d="M65 120H450" stroke="#92a3b9" stroke-width="5"/>`+[['Start',65],['Schritte',260],['Ende',450]].map(([label,x],i)=>`<circle cx="${x}" cy="120" r="${i===1?17:26}" fill="${i===2?'#d7eddf':'#e1edfa'}"/>`+figureText(x,190,label,22)).join('')+figureIcon('flag',450,53,.65)+figureText(260,45,'Ein erreichbarer Endpunkt',23);
    break;
   case 'checklist':
    height=320;
@@ -174,7 +174,7 @@ function renderFigure(taskId,slide){
   case 'ready': {
    const labels=spec.kind==='milestones'?['Definition','Eigenschaften','Reihenfolge']:spec.kind==='principles'?['Eindeutig','Ausführbar','Endlich']:['Begriffe wiederholen','Schritte zuordnen','Anwendung üben'];
    height=300;
-   body=labels.map((label,i)=>figureIcon(spec.kind==='ready'?'pencil':'check',72,55+i*88,.6)+figurePanel(125,20+i*88,350,70,label,['#fff1d6','#eaf5f1','#eeeafa'][i])).join('');
+   body=labels.map((label,i)=>figureIcon(spec.kind==='ready'?'pencil':'check',72,55+i*88,.6)+figurePanel(125,20+i*88,350,70,label,['#fff1d6','#eaf5f1','#e7f2fb'][i])).join('');
    break;
   }
   case 'flowSequence': {
@@ -208,7 +208,7 @@ function renderFigure(taskId,slide){
    break;
   case 'loopTypes':
    height=350;
-   body=figureText(260,30,'Zählschleife',23)+figurePanel(60,55,400,75,['10-mal','Hampelmann machen'])+figureText(260,180,'Bedingungsschleife',23)+figurePanel(60,205,400,90,['Solange das Glas nicht voll ist:','weiter Wasser eingießen'], '#eeeafa',19);
+   body=figureText(260,30,'Zählschleife',23)+figurePanel(60,55,400,75,['10-mal','Hampelmann machen'])+figureText(260,180,'Bedingungsschleife',23)+figurePanel(60,205,400,90,['Solange das Glas nicht voll ist:','weiter Wasser eingießen'], '#e7f2fb',19);
    break;
   case 'toolbox':
   case 'symbolSummary':
@@ -221,7 +221,7 @@ function renderFigure(taskId,slide){
    break;
   case 'flowTypes':
    height=375;
-   body=figureText(20,45,'Sequenz',21,'start')+arrow('M235 40H475')+figureText(20,150,'Verzweigung',21,'start')+`<path d="M300 110L340 145L300 180L260 145Z" fill="#eeeafa" stroke="#7565a5" stroke-width="2"/>`+arrow('M340 145H475')+arrow('M300 180V215H475')+figureText(20,310,'Schleife',21,'start')+figurePanel(260,260,160,65,'Schritt')+arrow('M420 292H485V350H235V292H258');
+   body=figureText(20,45,'Sequenz',21,'start')+arrow('M235 40H475')+figureText(20,150,'Verzweigung',21,'start')+`<path d="M300 110L340 145L300 180L260 145Z" fill="#e7f2fb" stroke="#7565a5" stroke-width="2"/>`+arrow('M340 145H475')+arrow('M300 180V215H475')+figureText(20,310,'Schleife',21,'start')+figurePanel(260,260,160,65,'Schritt')+arrow('M420 292H485V350H235V292H258');
    break;
   case 'overview':
    height=310;
@@ -229,7 +229,7 @@ function renderFigure(taskId,slide){
    break;
   case 'skills':
    height=340;
-   body=[['Ablaufplan','lesen'],['Entscheidungen','verstehen'],['Schleifen','erkennen'],['Eigene Abläufe','zeichnen']].map((label,i)=>figurePanel(20+(i%2)*260,20+Math.floor(i/2)*155,240,125,label,['#fff1d6','#eeeafa','#eaf5f1','#eaf0fa'][i])).join('');
+   body=[['Ablaufplan','lesen'],['Entscheidungen','verstehen'],['Schleifen','erkennen'],['Eigene Abläufe','zeichnen']].map((label,i)=>figurePanel(20+(i%2)*260,20+Math.floor(i/2)*155,240,125,label,['#fff1d6','#e7f2fb','#eaf5f1','#eaf0fa'][i])).join('');
    break;
  }
  if(!body)return '';

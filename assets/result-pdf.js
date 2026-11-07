@@ -48,7 +48,7 @@ async function buildTestResultPdf(result){
  pdf.setProperties({title:`Testergebnis – ${result.topic}`,subject:result.isDemo?'Übungstest':`${result.subject} · Klasse ${result.grade}`,author:'Frau Salliers Lernwelt'});
  const left=18,width=174,bottom=275;let y=34;
  function header(){
-  pdf.setFont('DejaVu','bold');pdf.setFontSize(10);pdf.setTextColor(68,63,133);
+  pdf.setFont('DejaVu','bold');pdf.setFontSize(10);pdf.setTextColor(22,59,99);
   pdf.text('Frau Salliers Lernwelt · Testergebnis',left,12);
   pdf.setFont('DejaVu','normal');pdf.setFontSize(8);pdf.setTextColor(60,65,80);
   const label=`${result.topic} · ${result.name} · ${result.date}`;
@@ -63,14 +63,14 @@ async function buildTestResultPdf(result){
   y+=gap;
  }
  // Seite 1 bleibt ausschließlich das persönliche Ergebnisblatt.
- pdf.setDrawColor(83,73,150);pdf.setLineWidth(.8);pdf.roundedRect(12,12,186,270,4,4);
- pdf.setDrawColor(193,163,88);pdf.setLineWidth(.4);pdf.roundedRect(16,16,178,262,3,3);
+ pdf.setDrawColor(22,59,99);pdf.setLineWidth(.8);pdf.roundedRect(12,12,186,270,4,4);
+ pdf.setDrawColor(229,129,38);pdf.setLineWidth(.4);pdf.roundedRect(16,16,178,262,3,3);
  function centered(text,y,size=12,bold=false){
   pdf.setFont('DejaVu',bold?'bold':'normal');pdf.setFontSize(size);pdf.setTextColor(35,43,65);
   const lines=pdf.splitTextToSize(String(text),145);pdf.text(lines,105,y,{align:'center'});
  }
  centered('Frau Salliers Lernwelt',37,13,true);
- pdf.setDrawColor(193,163,88);pdf.setFillColor(253,246,225);pdf.circle(105,58,10,'FD');
+ pdf.setDrawColor(229,129,38);pdf.setFillColor(255,243,226);pdf.circle(105,58,10,'FD');
  centered('★',61,18,true);
  centered('URKUNDE',87,30,true);
  centered(result.isDemo?'Du hast den Übungstest ausprobiert!':'Du hast den Test abgeschlossen.',101,11);
@@ -78,7 +78,7 @@ async function buildTestResultPdf(result){
  centered(`Thema: ${result.topic}`,150,15,true);
  centered(result.isDemo?'Eingabe · Auswertung · PDF-Download':`${result.subject} · Klasse ${result.grade}`,166,11);
  centered(`Datum: ${result.date}`,179,11);
- pdf.setFillColor(240,238,251);pdf.roundedRect(30,191,150,42,4,4,'F');
+ pdf.setFillColor(230,241,252);pdf.roundedRect(30,191,150,42,4,4,'F');
  centered(result.isDemo?`${result.score} von ${result.maximum} richtig`:`${result.score} / ${result.maximum} Punkte`,207,19,true);
  centered(result.isDemo?'Zum Ausprobieren und Üben':`Note ${result.mark}`,224,15,true);
  centered('Deine Antworten und Korrekturen findest du ab Seite 2.',249,10);
