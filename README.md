@@ -1,4 +1,4 @@
-# Frau Salliers Lernwelt – Version 0.45
+# Frau Salliers Lernwelt – Version 0.46
 
 Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Hardware und
 Software (Klasse 5), Binärsystem und Algorithmen (Klasse 6). Weitere Bereiche
@@ -26,7 +26,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.45.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.46.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +51,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.45.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.46.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -82,7 +82,7 @@ vorgeschaltete Übungen. Er bleibt mit 20 geschlossenen Fragen automatisch
 kontrollierbar. Sieben Testfragen wurden passend zum verbleibenden Lernstoff
 ersetzt. Hardware und Binärsystem behalten ihre bisherigen Abläufe.
 
-19 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
+20 Browserregressionen prüfen alle Module, Übungsseiten, Tests und Druck/PDF,
 zusätzlich denselben Stand als exportierte Einzeldatei ohne Netzwerk.
 
 Seit 0.43 zeigt Lernwelt 1, Folie 6 nur das Eierbild; die zusätzliche Grafik
@@ -127,3 +127,25 @@ Der zusätzliche Downloadtest prüft echte PDF-Dateien für alle drei Tests,
 Umlaute, Metadaten, alle 20 Fragen, Korrekturen, Diagrammbilder, Seitenzahlen,
 sichere Dateinamen, wiederholte Downloads, Fehler-/Wiederholungsfall sowie das
 Zurücksetzen beim Modulwechsel. Er stellt sicher, dass kein Druckdialog öffnet.
+
+
+## Urkunde und Übungstest seit 0.46
+
+Der Ergebnis-Download steht oben auf der Auswertungsseite. Seite 1 der PDF ist
+als Urkunde gestaltet: Name, Thema, Fach/Klasse, Datum, Punkte und Note. Die
+Aufgabenauswertung beginnt immer erst auf Seite 2. Normale Testergebnisse
+behalten ihre bisherige automatische Bewertung. Der sekundäre Druckknopf bleibt.
+
+Direkt auf der Startseite steht ein eigenständiger Übungstest mit Startcode
+`1234`. Er enthält 15 einfache witzige Fragen mit Auswahl, Zahleneingabe und
+Reihenfolge-Aufgaben. Die Schüler üben Namen eingeben, auswerten, korrigierte
+Antworten lesen, PDF herunterladen und die Datei öffnen. Es wird keine Note
+berechnet oder in die PDF geschrieben; die Anzahl richtiger Antworten ist
+sichtbar. Der Übungstest ist nicht an Fach oder Klasse gebunden und verändert
+den bestehenden Modulkatalog nicht. Seine PDF ist ausdrücklich als Übungstest
+gekennzeichnet. Danach führt die Navigation wieder auf die Startseite.
+
+`assets/try-test.js` ergänzt dafür eine eigene Engine mit gemeinsamer Auswertung
+und PDF-Erzeugung. Ein zusätzlicher Browsertest prüft Startseite/Code, Eingaben,
+Namenspflicht, unvollständige Abgabe, Auswertung ohne Note, echten PDF-Download,
+Urkunde auf Seite 1, Aufgaben ab Seite 2, mobile Ansicht, Druck und Neustart.

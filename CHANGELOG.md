@@ -1,5 +1,17 @@
 # Änderungen
 
+## 0.46 – Urkunden-PDF und Übungstest auf der Startseite
+
+- PDF-Download oben auf der Auswertungsseite, vor Hinweis und Aufgaben.
+- Erste PDF-Seite als Urkunde mit persönlichen Daten und Ergebnis; sämtliche
+  Aufgaben und Korrekturen beginnen erst ab Seite 2.
+- Startseiten-Übungstest mit Code 1234: 15 witzige Aufgaben zum Auswählen,
+  Eingeben und Ordnen. Auswertung und PDF ohne Note; keine Fach-/Klassenbindung.
+- Übungstest unterstützt denselben Download, sichere Dateinamen, Neustart und
+  Rückkehr auf die Startseite. Bestehende Lernmodule und Tests bleiben erhalten.
+- 20 Browserregressionen einschließlich Urkunde, Seitenaufteilung, Startcode,
+  unbenotetem Übungstest, Mobilansicht, echten Downloads und Offline-Einzeldatei.
+
 ## 0.45 – direkter PDF-Download für Testergebnisse
 
 - Alle drei Tests erhalten einen Button zum direkten PDF-Download. Der

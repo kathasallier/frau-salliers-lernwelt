@@ -85,7 +85,7 @@ function printTest(id){
  win.document.open();win.document.write(page);win.document.close();
 }
 function start(id){
- const requested=tasks.find(t=>t.id===id);
+ const requested=id===TRY_TEST.id?TRY_TEST:tasks.find(t=>t.id===id);
  if(!requested){alert('Dieses Modul ist nicht verfügbar. Bitte wähle es erneut aus.');return false}
  if(requested.mode==='Test'){
   if(!checkTestCode(id))return;
@@ -233,7 +233,8 @@ const activityEngines={
   finish:finishQuestions
  },
  hardwarePractice:{start:hwStartPractice,finish(){hwStage<2?finishSorting():hwFinishPractice()}},
- hardwareTest:{start:hwStartTest,finish:hwFinishTest}
+ hardwareTest:{start:hwStartTest,finish:hwFinishTest},
+ tryTest:{start:renderTryTest,finish:finishTryTest}
 };
 function resetActivityState(){
  clearTestResult();
@@ -264,8 +265,8 @@ function initializeActivities(){
 }
 
 $('finish').addEventListener('click',finish);$('reset').addEventListener('click',()=>start(current.id));
-$('back').addEventListener('click',()=>{show('home');navStep('Materials')});
-$('again').addEventListener('click',()=>{show('home');navStep('Materials')});
+$('back').addEventListener('click',()=>{show('home');navStep(current?.isDemo?'Subject':'Materials')});
+$('again').addEventListener('click',()=>{show('home');navStep(current?.isDemo?'Subject':'Materials')});
 $('lessonBack').addEventListener('click',()=>{show('home');navStep('Materials')});
 $('lessonPrev').addEventListener('click',()=>{if(lessonPage>0){lessonPage--;renderLesson();window.scrollTo(0,0)}});
 $('lessonNext').addEventListener('click',()=>{if(lessonPage===current.slides.length-1){start(current.practiceId)}else{lessonPage++;renderLesson();window.scrollTo(0,0)}});

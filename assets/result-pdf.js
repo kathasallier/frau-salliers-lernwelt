@@ -12,12 +12,13 @@ function captureTestResult(name,answers,score){
  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);
  const get=type=>parts.find(p=>p.type===type).value;
  testResultSnapshot=JSON.parse(JSON.stringify({
-  name,topic:current.topic,subject:current.subject,grade:selectedGrade||current.grades[0],
+  name,topic:current.topic,subject:current.subject,isDemo:!!current.isDemo,grade:current.isDemo?null:selectedGrade||current.grades[0],
   date:`${get('day')}.${get('month')}.${get('year')}`,fileDate:`${get('year')}-${get('month')}-${get('day')}`,
-  score,maximum:answers.length,mark:grade(score),
+  score,maximum:answers.length,mark:current.isDemo?null:grade(score),
   answers:answers.map((answer,i)=>({...answer,code:current.questions[i]?.code||'',
    figure:current.topic==='Algorithmen'&&current.questions[i]?.figure?namespaceAlgoFigure(algoFigure(current.questions[i].figure),'pdf-'+i):''}))
  }));
+ document.getElementById('pdfNotice').innerHTML=current.isDemo?'<strong>Probiere den Download aus:</strong> Speichere deine PDF und öffne sie zur Kontrolle.':'<strong>Ergebnis abgeben:</strong> Lade dein Testergebnis als PDF herunter, speichere die Datei und gib sie bei deiner Lehrkraft ab.';
  document.getElementById('downloadTestPdf').hidden=false;
  document.getElementById('pdfDownloadStatus').textContent='';
 }
@@ -44,7 +45,7 @@ async function buildTestResultPdf(result){
  for(const style of ['normal','bold']){
   const file=`DejaVuSans-${style}.ttf`;pdf.addFileToVFS(file,RESULT_PDF_FONTS[style]);pdf.addFont(file,'DejaVu',style);
  }
- pdf.setProperties({title:`Testergebnis – ${result.topic}`,subject:`${result.subject} · Klasse ${result.grade}`,author:'Frau Salliers Lernwelt'});
+ pdf.setProperties({title:`Testergebnis – ${result.topic}`,subject:result.isDemo?'Übungstest':`${result.subject} · Klasse ${result.grade}`,author:'Frau Salliers Lernwelt'});
  const left=18,width=174,bottom=275;let y=34;
  function header(){
   pdf.setFont('DejaVu','bold');pdf.setFontSize(10);pdf.setTextColor(68,63,133);
@@ -61,10 +62,27 @@ async function buildTestResultPdf(result){
   for(const line of lines){ensure(lineHeight);pdf.setFont('DejaVu',bold?'bold':'normal');pdf.setFontSize(size);pdf.setTextColor(...color);pdf.text(line,left,y);y+=lineHeight}
   y+=gap;
  }
- header();
- write(`Thema: ${result.topic}`,{size:17,bold:true});
- write(`Name: ${result.name}`);write(`Fach: ${result.subject} · Klasse: ${result.grade} · Datum: ${result.date}`);
- write(`${result.score} / ${result.maximum} Punkte · Note ${result.mark}`,{size:15,bold:true,color:[68,63,133],gap:5});
+ // Seite 1 bleibt ausschließlich das persönliche Ergebnisblatt.
+ pdf.setDrawColor(83,73,150);pdf.setLineWidth(.8);pdf.roundedRect(12,12,186,270,4,4);
+ pdf.setDrawColor(193,163,88);pdf.setLineWidth(.4);pdf.roundedRect(16,16,178,262,3,3);
+ function centered(text,y,size=12,bold=false){
+  pdf.setFont('DejaVu',bold?'bold':'normal');pdf.setFontSize(size);pdf.setTextColor(35,43,65);
+  const lines=pdf.splitTextToSize(String(text),145);pdf.text(lines,105,y,{align:'center'});
+ }
+ centered('Frau Salliers Lernwelt',37,13,true);
+ pdf.setDrawColor(193,163,88);pdf.setFillColor(253,246,225);pdf.circle(105,58,10,'FD');
+ centered('★',61,18,true);
+ centered('URKUNDE',87,30,true);
+ centered(result.isDemo?'Du hast den Übungstest ausprobiert!':'Du hast den Test abgeschlossen.',101,11);
+ centered(result.name,120,result.name.length>45?14:19,true);
+ centered(`Thema: ${result.topic}`,150,15,true);
+ centered(result.isDemo?'Eingabe · Auswertung · PDF-Download':`${result.subject} · Klasse ${result.grade}`,166,11);
+ centered(`Datum: ${result.date}`,179,11);
+ pdf.setFillColor(240,238,251);pdf.roundedRect(30,191,150,42,4,4,'F');
+ centered(result.isDemo?`${result.score} von ${result.maximum} richtig`:`${result.score} / ${result.maximum} Punkte`,207,19,true);
+ centered(result.isDemo?'Zum Ausprobieren und Üben':`Note ${result.mark}`,224,15,true);
+ centered('Deine Antworten und Korrekturen findest du ab Seite 2.',249,10);
+ pdf.addPage();header();
  write('Auswertung der Aufgaben',{size:13,bold:true,gap:5});
  for(let i=0;i<result.answers.length;i++){
   const answer=result.answers[i];ensure(25);
@@ -94,7 +112,7 @@ async function downloadTestResultPdf(){
   const blob=await buildTestResultPdf(result),url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download=resultPdfFilename(result);document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),30000);
-  if(testResultSnapshot===result)status.textContent='PDF heruntergeladen. Speichere sie und gib sie bei deiner Lehrkraft ab.';
+  if(testResultSnapshot===result)status.textContent=result.isDemo?'PDF heruntergeladen. Öffne die Datei zur Kontrolle.':'PDF heruntergeladen. Speichere sie und gib sie bei deiner Lehrkraft ab.';
  }catch(error){
   if(testResultSnapshot===result)status.textContent='Die PDF konnte nicht erstellt werden. Bitte versuche den Download erneut.';
  }finally{button.disabled=false;button.textContent='Testergebnis als PDF herunterladen'}
