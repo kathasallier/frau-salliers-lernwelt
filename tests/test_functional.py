@@ -126,12 +126,12 @@ class LearningWorldTests(unittest.TestCase):
 
     def test_navigation_all_modules_and_empty_grades(self):
         ids = self.page.evaluate('tasks.map(t=>t.id)')
-        self.assertEqual(len(ids), 10)
+        self.assertEqual(len(ids), 19)
         for task_id in ids:
             with self.subTest(module=task_id):
                 self.catalog(task_id)
                 self.assertTrue(self.page.locator(f'[data-task="{task_id}"]').is_visible())
-                self.assertEqual(self.page.locator('.material-group').count(),2 if task_id.startswith('binary-') else 3)
+                self.assertEqual(self.page.locator('.material-group').count(),1 if task_id.startswith('nutrients-') else 2 if task_id.startswith('binary-') else 3)
         self.page.reload()
         self.page.locator('[data-sub="Informatik"]').click()
         self.page.locator('[data-grade="5"]').click()
@@ -155,7 +155,7 @@ class LearningWorldTests(unittest.TestCase):
             self.page.locator('[data-crumb="0"]').click()
 
     def test_all_lessons_feedback_visuals_and_practice_transition(self):
-        ids = self.page.evaluate('tasks.filter(t=>t.mode==="Lernen").map(t=>t.id)')
+        ids = self.page.evaluate('tasks.filter(t=>t.mode==="Lernen"&&!t.nutrientUnit).map(t=>t.id)')
         for task_id in ids:
             with self.subTest(module=task_id):
                 self.open(task_id)
@@ -711,7 +711,7 @@ class LearningWorldTests(unittest.TestCase):
         self.assertTrue(self.page.locator('#stepSubject').is_visible())
 
     def test_lesson_title_guide_and_immediate_required_answers(self):
-        ids=self.page.evaluate('tasks.filter(t=>t.mode==="Lernen").map(t=>t.id)')
+        ids=self.page.evaluate('tasks.filter(t=>t.mode==="Lernen"&&!t.nutrientUnit).map(t=>t.id)')
         for task_id in ids:
             self.catalog(task_id)
             self.page.locator(f'[data-task="{task_id}"]').click()
@@ -895,6 +895,102 @@ class LearningWorldTests(unittest.TestCase):
         self.assertTrue(self.page.locator('body').evaluate('(b)=>b.classList.contains("print-notebook")'))
         self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
         self.assertFalse(self.page.locator('body').evaluate('(b)=>b.classList.contains("print-notebook")'))
+
+    def test_nutrient_station_flow_feedback_heft_and_print(self):
+        units=self.page.evaluate('NUTRIENT_UNITS')
+        self.assertEqual(len(units),9)
+        for u in units:
+            with self.subTest(station=u['id']):
+                self.open(u['id'])
+                self.assertIn('HAUSWIRTSCHAFT',self.page.locator('#lessonContent').inner_text())
+                self.assertEqual(self.page.locator('[data-nutrient-station]').count(),9)
+                for i,s in enumerate(u['slides']):
+                    self.assertEqual(self.page.locator('#lessonContent h1').inner_text(),s['title'])
+                    if s.get('workbook'):
+                        self.assertIn(s['workbook']['heading'],self.page.locator('.nutrient-workbook').inner_text())
+                    if s.get('reflection'):
+                        self.assertIn('Extrablatt',self.page.locator('.nutrient-reflection').inner_text())
+                    if s.get('question'):
+                        self.assertTrue(self.page.locator('#lessonNext').is_disabled())
+                        wrong=(s['answer']+1)%len(s['choices'])
+                        self.page.locator(f'[name="lessonAnswer"][value="{wrong}"]').check()
+                        self.assertTrue(self.page.locator('#lessonFeedback .bad').is_visible())
+                        self.page.locator(f'[name="lessonAnswer"][value="{s["answer"]}"]').check()
+                        self.assertTrue(self.page.locator('#lessonFeedback .good').is_visible())
+                        if i<len(u['slides'])-1:
+                            self.page.locator('#lessonNext').click();self.page.locator('#lessonPrev').click()
+                            self.assertTrue(self.page.locator('#lessonFeedback .good').is_visible())
+                    if i<len(u['slides'])-1:self.page.locator('#lessonNext').click()
+                self.page.evaluate('window.print=()=>{}')
+                self.page.locator('#printNutrientStation').click()
+                self.assertEqual(self.page.locator('#notebookPrint .print-task').count(),len(u['slides']))
+                self.assertIn('Extrablatt',self.page.locator('#notebookPrint').inner_text())
+                self.page.emulate_media(media='print')
+                self.assertTrue(self.page.locator('#notebookPrint').is_visible())
+                self.assertFalse(self.page.locator('main').is_visible())
+                self.assert_pdf(self.page)
+                self.page.emulate_media(media='screen')
+                self.page.evaluate('window.dispatchEvent(new Event("afterprint"))')
+                self.page.locator('#lessonNext').click()
+                index=[x['id'] for x in units].index(u['id'])
+                if index<8:
+                    self.assertEqual(self.page.evaluate('current.id'),units[index+1]['id'])
+                    self.assertEqual(self.page.evaluate('lessonStage'),'title')
+                else:self.assertTrue(self.page.locator('#stepMaterials').is_visible())
+                self.assertTrue(self.page.evaluate('(id)=>nutrientCompleted.has(id)',u['id']))
+
+    def test_nutrient_check_scoring_boundaries_and_corrections(self):
+        self.open('nutrients-check')
+        self.assertEqual(self.page.evaluate('current.slides.filter(s=>s.scoreGroup).length'),16)
+        for points,color in [(0,'Rot'),(5,'Rot'),(6,'Gelb'),(11,'Gelb'),(12,'Grün'),(16,'Grün')]:
+            self.page.evaluate('''(points)=>{
+                let count=0;lessonResponses={};
+                current.slides.forEach((s,i)=>{if(s.scoreGroup){lessonResponses[i]={checked:true,choice:count++<points?s.answer:1-s.answer}}});
+                lessonPage=current.slides.length-1;renderLesson();
+            }''',points)
+            self.assertIn(f'{points} / 16 Punkte · {color}',self.page.locator('.nutrient-total').inner_text())
+            self.assertEqual(self.page.locator('.nutrient-result tbody tr').count(),5)
+        self.page.locator('#lessonPrev').click()
+        s=self.page.evaluate('current.slides[lessonPage]')
+        self.page.locator(f'[name="lessonAnswer"][value="{1-s["answer"]}"]').check()
+        self.page.locator('#lessonNext').click()
+        self.assertIn('15 / 16',self.page.locator('.nutrient-total').inner_text())
+        self.page.evaluate('lessonResponses={};renderLesson()')
+        self.assertIn('noch unvollständig',self.page.locator('.nutrient-result').inner_text())
+        self.page.locator('[data-nutrient-station="nutrients-intro"]').click()
+        self.assertEqual(self.page.evaluate('lessonStage'),'title')
+        self.page.locator('#lessonNext').click()
+        self.assertIn('Befülle dein Merkheft',self.page.locator('.lesson-guide').inner_text())
+        self.assertIn('Extrablatt',self.page.locator('.lesson-guide').inner_text())
+        self.page.locator('#lessonBack').click()
+        self.assertEqual(self.page.locator('[data-task^="nutrients-"]').count(),9)
+        self.assertEqual(self.page.locator('[data-print-test]').count(),0)
+        self.page.locator('[data-crumb="1"]').click()
+        self.assertTrue(self.page.locator('#stepGrade').is_visible())
+        self.page.locator('[data-grade="7"]').click();self.page.locator('[data-chapter="chapter-1"]').click()
+        self.assertEqual(self.page.locator('[data-topic]').inner_text().splitlines()[1],'Nährstoffe')
+
+    def test_nutrient_source_coverage_mobile_and_diagrams(self):
+        units=self.page.evaluate('NUTRIENT_UNITS')
+        pages={s['workbook']['page'] for u in units for s in u['slides'] if s.get('workbook')}
+        self.assertTrue(set(range(1,12)).issubset(pages))
+        questions=[s['question'] for u in units for s in u['slides'] if s.get('question')]
+        self.assertEqual(len(questions),len(set(questions)))
+        self.assertTrue(all(len([s for s in u['slides'] if s.get('question')])>=2 for u in units))
+        self.assertFalse(self.page.evaluate('tasks.some(t=>t.nutrientUnit&&t.mode!=="Lernen")'))
+        self.page.set_viewport_size({'width':390,'height':844})
+        for u in units:
+            self.page.evaluate('(id)=>{chooseSubject("Hauswirtschaft");chooseGrade(7);chooseChapter("chapter-1");chooseTopic("Nährstoffe");start(id);lessonStage="content"}',u['id'])
+            for i,s in enumerate(u['slides']):
+                self.page.evaluate('(i)=>{lessonPage=i;renderLesson()}',i)
+                self.assertTrue(self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'{u["id"]}: {s["title"]}')
+                if s.get('figure'):
+                    self.assertTrue(self.page.locator('.nutrient-figure').is_visible())
+                    self.assertTrue(self.page.locator('.nutrient-figure figcaption').inner_text())
+        import json
+        text=json.dumps(units,ensure_ascii=False)
+        for clarification in ['Mineralstoffe werden durch Hitze nicht zerstört','Vitamin B12','Druckfehler','fettlöslich','Extrablatt']:
+            self.assertIn(clarification,text)
 
 
 if __name__ == '__main__':

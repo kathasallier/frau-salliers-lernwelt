@@ -1,5 +1,17 @@
 # Änderungen
 
+## 0.51 – Nährstoffe für Hauswirtschaft, Klasse 7
+
+- Neue Einführung und acht Lernwelten anhand des bereitgestellten Merkhefts.
+- Heftaufträge mit gedruckten Seitenzahlen und Überschriften; Reflexions- und
+  Denkaufgaben ausdrücklich auf dem Extrablatt.
+- Eigene Schaubilder und Wissens-Check-ups an jeder Station mit sofortiger
+  Rückmeldung; 16 Abschlussaussagen mit Gruppenpunkten und Lernampel ohne Note.
+- Druck-/PDF-Übersicht jeder Station, Stationswechsel und Bearbeitungsmarkierung.
+- Druckfehler und fachliche Vereinfachungen der Vorlage erläutert; Quellenabgleich
+  dokumentiert. Lehrkraft-PDF nicht eingebunden. Informatik-Inhalte unverändert.
+- 28 Funktionstests einschließlich bisheriger Übungen, Tests, Navigation und PDF.
+
 ## 0.50 – Kapitelwahl und weitere Korrekturen am Binärsystem
 
 - Klasse 6 erhält Kapitel 1 „Algorithmen und Problemlösen“ mit den nummerierten

@@ -1,6 +1,7 @@
-# Frau Salliers Lernwelt – Version 0.50
+# Frau Salliers Lernwelt – Version 0.51
 
-Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Das Binärsystem sowie Algorithmen in Klasse 6.
+Interaktive Lernwebseite für die Klassen 5–10. Aktuelle Inhalte: Das Binärsystem und Algorithmen in Informatik, Klasse 6,
+sowie Nährstoffe in Hauswirtschaft, Klasse 7.
 Das Klasse-5-Thema ist vorerst aus dem Angebot genommen. Weitere Bereiche
 zeigen einen Hinweis, solange noch keine Inhalte hinterlegt sind.
 
@@ -26,7 +27,7 @@ Eingaben bleiben nur während der aktuellen Bearbeitung erhalten.
 python3 scripts/build_offline.py
 ```
 
-Ergebnis: `dist/Frau-Salliers-Lernwelt-0.50.html`. Diese Datei enthält alle
+Ergebnis: `dist/Frau-Salliers-Lernwelt-0.51.html`. Diese Datei enthält alle
 Skripte, Stile und Bilddaten; weitere Ordner oder ein Server sind nicht nötig.
 Drucken und PDF-Ausgabe funktionieren über die vorhandenen Schaltflächen.
 
@@ -51,7 +52,7 @@ Webseite. Fachliche Quellen sind intern in `docs/unterrichtsunterlagen.md` dokum
 
 ```sh
 CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
-LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.50.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
+LERNWELT_OFFLINE_HTML="$PWD/dist/Frau-Salliers-Lernwelt-0.51.html" CHROMIUM_NO_SANDBOX=1 python3 -m unittest discover -s tests -v
 ```
 
 Der zweite Lauf sperrt das Browsernetzwerk. Nur die initiale Dokumentanfrage
@@ -260,3 +261,43 @@ nicht angezeigt. Die Stellenwerte und schaltbaren Lampen bleiben sichtbar.
 25 Browserregressionen prüfen die Kapitel-/Themenwahl, sämtliche aktiven
 Lernmodule und Übungen, Druck und Ergebnis-PDFs sowie die Offline-Einzeldatei.
 Frühere Abschnitte dokumentieren den jeweiligen Entwicklungsstand.
+
+## Nährstoffe – Hauswirtschaft, Klasse 7 (0.51)
+
+Auswahl: Hauswirtschaft → Klasse 7 → Kapitel 1: Ernährung → Nährstoffe.
+Die Einführung erklärt das Befüllen des Merkhefts und den Arbeitsort:
+Reflexions- und Denkaufgaben gehören auf ein Extrablatt, mit Name, Datum,
+Station und Heftseite. Danach folgen acht Lernwelten:
+
+1. Überblick: Makro- und Mikronährstoffe (Heftseite 1).
+2. Kohlenhydrate (Heftseiten 2–3).
+3. Fette (Heftseiten 4–5).
+4. Proteine (Heftseite 6).
+5. Vitamine (Heftseite 7).
+6. Mineralstoffe (Heftseite 8).
+7. Schonende Zubereitung (Heftseite 9).
+8. Nährstoff-Check und Lernampel (Heftseiten 10–11).
+
+`assets/nutrient-world.js` enthält die eigenen Erklärungen, Modelle,
+Heftaufträge und Wissens-Check-ups mit unmittelbarer Rückmeldung.
+Die roten Einträge der bereitgestellten PDF wurden als Lösungsschlüssel
+verwendet; die Lehrkraft-PDF wird nicht öffentlich eingebunden.
+Alle gedruckten Heftseiten sind abgedeckt; Deckblatt und Inhaltsverzeichnis
+werden in der Einführung erklärt. Fachliche Klarstellungen und Quellenabgleich
+stehen in `docs/naehrstoffe.md`.
+
+Die 16 Abschlussaussagen werden jeweils als richtig oder falsch beurteilt.
+Jede korrekte Entscheidung zählt 1 Punkt, einschließlich des Erkennens einer
+falschen Aussage. Grenzen der Lernampel: 0–5 / 6–11 / 12–16. Der Abschluss ist
+kein benoteter Test. Die Lernhilfe berücksichtigt den aktuellen, gegebenenfalls
+verbesserten Antwortstand. Es gibt kein neues Zugangscode-Verfahren.
+
+Jede Station kann vollständig gedruckt oder über den Druckdialog als PDF
+gespeichert werden. Die Auswertung erscheint dabei mit dem aktuellen Stand.
+Antworten werden beim Neustart einer Station zurückgesetzt. Als bearbeitet
+markierte Stationen bleiben bis zum Neuladen der Seite markiert; es werden
+keine neuen personenbezogenen Daten gespeichert oder übertragen.
+
+28 Browserregressionen decken die bisherigen Bereiche sowie den gesamten
+Stationsdurchlauf, falsche/richtige Rückmeldungen, Rücknavigation, alle
+Ampelgrenzen, Seitenabdeckung, Mobilansicht und Stationsdruck ab.
